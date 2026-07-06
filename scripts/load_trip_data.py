@@ -1,10 +1,10 @@
-import pandas as pd  # Import Pandas library for working with table-like data
-from sqlalchemy import create_engine  # Import function to connect Python with PostgreSQL
-from datetime import datetime  # Import datetime to get current date and time
+import pandas as pd                         # Import Pandas library for working with table-like data
+from sqlalchemy import create_engine        # Import function to connect Python with PostgreSQL
+from datetime import datetime               # Import datetime to get current date and time
 
-print("Reading parquet file...")  #display msg
+print("Reading parquet file...")            #display msg
 
-df = pd.read_parquet(             #to read data
+df = pd.read_parquet(                       #to read data
     "data/raw/yellow_tripdata_2024-01.parquet"
 )
 
