@@ -61,4 +61,4 @@ df.to_sql(
 )
 
 # Display success message after data is loaded
-print("Data loaded successfully!")
+print("Data loaded successfully!") 
