@@ -57,3 +57,15 @@ print(
         ]
     ].head()
 )
+
+# Step 7: Remove duplicate trips
+before_duplicates = len(clean_df)
+
+clean_df = clean_df.drop_duplicates(subset=["trip_id"])
+
+after_duplicates = len(clean_df)
+
+print("\nDuplicate Removal Completed")
+print("Before removing duplicates:", before_duplicates)
+print("After removing duplicates :", after_duplicates)
+print("Duplicates removed        :", before_duplicates - after_duplicates)
