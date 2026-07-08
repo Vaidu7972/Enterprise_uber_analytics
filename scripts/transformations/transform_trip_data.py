@@ -36,8 +36,24 @@ Distance must be greater than 0
 """
     
 #calculating trip duration
+# Convert columns to datetime
+clean_df["pickup_datetime"] = pd.to_datetime(clean_df["pickup_datetime"])
+clean_df["dropoff_datetime"] = pd.to_datetime(clean_df["dropoff_datetime"])
+
+# Calculate trip duration
 clean_df["trip_duration_minutes"] = (
     clean_df["dropoff_datetime"] -
     clean_df["pickup_datetime"]
-).dt.total_seconds() / 60    
-    
+).dt.total_seconds() / 60
+
+print("\nTrip Duration Created Successfully!")
+
+print(
+    clean_df[
+        [
+            "pickup_datetime",
+            "dropoff_datetime",
+            "trip_duration_minutes"
+        ]
+    ].head()
+)
