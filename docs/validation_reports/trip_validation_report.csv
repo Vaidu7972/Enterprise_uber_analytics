@@ -1,0 +1,2 @@
+total_records_checked,total_null_values,invalid_fare_records,invalid_distance_records,duplicate_trips
+10000,0,226,309,0
