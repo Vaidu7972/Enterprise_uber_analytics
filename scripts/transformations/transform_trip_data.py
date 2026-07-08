@@ -69,3 +69,71 @@ print("\nDuplicate Removal Completed")
 print("Before removing duplicates:", before_duplicates)
 print("After removing duplicates :", after_duplicates)
 print("Duplicates removed        :", before_duplicates - after_duplicates)
+
+# Step 8: Create rejected records dataframe
+rejected_df = df[
+    (df["fare_amount"] <= 0) |
+    (df["trip_distance"] <= 0) |
+    (df["pickup_datetime"].isnull()) |
+    (df["dropoff_datetime"].isnull())
+].copy()
+
+rejected_df["rejection_reason"] = "Invalid fare, distance, or missing datetime"
+
+print("\nRejected Records Created")
+print("Rejected Records:", len(rejected_df))
+
+print(rejected_df.head())
+
+# Keep only columns needed for silver.trip_clean
+clean_df = clean_df[
+    [
+        "trip_id",
+        "vendor_id",
+        "pickup_datetime",
+        "dropoff_datetime",
+        "passenger_count",
+        "trip_distance",
+        "fare_amount",
+        "trip_duration_minutes",
+        "source_file",
+        "batch_id",
+        "load_timestamp"
+    ]
+]
+
+# Keep only columns needed for silver.trip_rejected
+rejected_df = rejected_df[
+    [
+        "trip_id",
+        "vendor_id",
+        "pickup_datetime",
+        "dropoff_datetime",
+        "passenger_count",
+        "trip_distance",
+        "fare_amount",
+        "rejection_reason"
+    ]
+]
+
+print("\nLoading clean records into silver.trip_clean...")
+clean_df.to_sql(
+    name="trip_clean",
+    schema="silver",
+    con=engine,
+    if_exists="append",
+    index=False,
+    method="multi"
+)
+
+print("Loading rejected records into silver.trip_rejected...")
+rejected_df.to_sql(
+    name="trip_rejected",
+    schema="silver",
+    con=engine,
+    if_exists="append",
+    index=False,
+    method="multi"
+)
+
+print("\nSilver Layer Load Completed Successfully!")
