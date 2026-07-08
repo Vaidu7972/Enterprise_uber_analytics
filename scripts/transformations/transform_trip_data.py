@@ -137,3 +137,4 @@ rejected_df.to_sql(
 )
 
 print("\nSilver Layer Load Completed Successfully!")
+
