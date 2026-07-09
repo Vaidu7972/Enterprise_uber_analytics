@@ -14,7 +14,9 @@ dates["day"] = dates["date_key"].dt.day
 dates["month"] = dates["date_key"].dt.month
 dates["year"] = dates["date_key"].dt.year
 dates["weekday"] = dates["date_key"].dt.day_name()
-dates["weekend"] = dates["weekday"].isin(["Saturday", "Sunday"])
+dates["week_number"] = dates["date_key"].dt.isocalendar().week.astype(int)
+dates["quarter"] = dates["date_key"].dt.quarter
+dates["is_weekend"] = dates["weekday"].isin(["Saturday", "Sunday"])
 
 dates.to_sql(
     "dim_date",
