@@ -9,10 +9,24 @@ engine = create_engine(
 print("Reading Bronze Layer...")
 
 # Read only a sample while developing
-df = pd.read_sql(
-    "SELECT * FROM bronze.trip_raw LIMIT 10000",
-    engine
+df = pd.read_sql("""
+WITH daily_sample AS (
+    SELECT *,
+           ROW_NUMBER() OVER (
+               PARTITION BY DATE(pickup_datetime)
+               ORDER BY trip_id
+           ) AS rn
+    FROM bronze.trip_raw
+    WHERE pickup_datetime >= '2024-01-01'
+      AND pickup_datetime < '2024-02-01'
 )
+SELECT *
+FROM daily_sample
+WHERE rn <= 500
+""", engine)
+
+if "rn" in df.columns:
+    df = df.drop(columns=["rn"])
 
 print(df.head())
 print(df.shape)
