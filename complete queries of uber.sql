@@ -1,4 +1,4 @@
-CREATE DATABASE uber_dw;
+
 -- ===========================================================
 -- ENTERPRISE UBER ANALYTICS DATABASE SETUP
 -- Run this inside uber_dw database
