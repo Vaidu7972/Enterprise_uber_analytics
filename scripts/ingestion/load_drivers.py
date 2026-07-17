@@ -1,30 +1,38 @@
 import pandas as pd
-from sqlalchemy import create_engine
-from datetime import datetime
+from pathlib import Path
+from utils.db_connection import get_engine
+
+engine = get_engine()
 
 print("Reading drivers.json...")
 
-df = pd.read_json("data/raw/drivers.json")
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+file_path = BASE_DIR / "data" / "raw" / "drivers.json"
 
-print("Rows:", len(df))
+drivers = pd.read_json(file_path)
 
-df["source_file"] = "drivers.json"
-df["batch_id"] = 1
-df["load_timestamp"] = datetime.now()
+drivers["source_file"] = "drivers.json"
+drivers["batch_id"] = 1
+drivers["load_timestamp"] = pd.Timestamp.now()
 
-engine = create_engine(
-    "postgresql+psycopg2://postgres:root@localhost:5432/uber_dw"
-)
+print("Drivers rows:", len(drivers))
+print(drivers.head())
 
-print("Loading driver data...")
+print("Clearing old bronze.driver_raw...")
 
-df.to_sql(
-    name="driver_raw",
+with engine.begin() as conn:
+    conn.exec_driver_sql("TRUNCATE TABLE bronze.driver_raw RESTART IDENTITY CASCADE")
+
+print("Loading drivers into PostgreSQL...")
+
+drivers.to_sql(
+    "driver_raw",
     schema="bronze",
     con=engine,
     if_exists="append",
     index=False,
+    chunksize=1000,
     method="multi"
 )
 
-print("Driver data loaded successfully!")
+print("Drivers loaded successfully!")
