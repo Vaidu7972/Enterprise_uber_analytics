@@ -117,3 +117,31 @@ The dashboard uses the following PostgreSQL tables:
 The Power BI dashboard file is available at:
 
 `dashboards/Enterprise_Uber_Analytics_Dashboard.pbix`
+
+## Project Summary
+
+Enterprise Uber Analytics Data Platform is an end-to-end data engineering and analytics project built using Python, PostgreSQL, SQL, and Power BI.
+
+The project follows Medallion Architecture with Bronze, Silver, and Gold layers. Raw Uber trip, driver, customer, and weather data are ingested into PostgreSQL, cleaned and transformed using Python, and modeled into fact and dimension tables for analytics.
+
+Power BI dashboards were created to analyze executive KPIs, revenue trends, and driver performance.
+
+## Dashboards
+
+1. Executive Dashboard
+2. Revenue Analysis Dashboard
+3. Driver Performance Dashboard
+
+## Tech Stack
+
+- Python
+- Pandas
+- PostgreSQL
+- SQL
+- Power BI
+- GitHub
+- VS Code
+
+## Architecture
+
+Raw Data → Bronze Layer → Silver Layer → Gold Layer → Analytics Marts → Power BI Dashboard
