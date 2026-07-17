@@ -21,6 +21,3 @@ logs/
 
 # Power BI temp/cache
 *.tmp
-
-airflow/logs/
-airflow/*.db

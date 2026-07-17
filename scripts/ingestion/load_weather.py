@@ -1,43 +1,26 @@
 import pandas as pd
-from pathlib import Path
-from utils.db_connection import get_engine
+from sqlalchemy import create_engine
+from datetime import datetime
 
-engine = get_engine()
+df = pd.read_csv(
+    "data/raw/weather.csv"
+)
 
-print("Reading weather.csv...")
+df["source_file"] = "weather.csv"
+df["batch_id"] = 1
+df["load_timestamp"] = datetime.now()
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-file_path = BASE_DIR / "data" / "raw" / "weather.csv"
+engine = create_engine(
+    "postgresql+psycopg2://postgres:root@localhost:5432/uber_dw"
+)
 
-weather = pd.read_csv(file_path)
-
-weather["weather_date"] = pd.to_datetime(
-    weather["weather_date"],
-    errors="coerce"
-).dt.date
-
-weather["source_file"] = "weather.csv"
-weather["batch_id"] = 1
-weather["load_timestamp"] = pd.Timestamp.now()
-
-print("Weather rows:", len(weather))
-print(weather.head())
-
-print("Clearing old bronze.weather_raw...")
-
-with engine.begin() as conn:
-    conn.exec_driver_sql("TRUNCATE TABLE bronze.weather_raw RESTART IDENTITY CASCADE")
-
-print("Loading weather into PostgreSQL...")
-
-weather.to_sql(
-    "weather_raw",
+df.to_sql(
+    name="weather_raw",
     schema="bronze",
     con=engine,
     if_exists="append",
     index=False,
-    chunksize=1000,
     method="multi"
 )
 
-print("Weather loaded successfully!")
+print("Weather data loaded successfully!")

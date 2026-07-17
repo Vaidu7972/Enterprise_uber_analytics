@@ -1,52 +1,39 @@
 import pandas as pd
 import xml.etree.ElementTree as ET
-from pathlib import Path
-from utils.db_connection import get_engine
+from sqlalchemy import create_engine
+from datetime import datetime
 
-engine = get_engine()
-
-print("Reading customers.xml...")
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-file_path = BASE_DIR / "data" / "raw" / "customers.xml"
-
-tree = ET.parse(file_path)
+tree = ET.parse("data/raw/customers.xml")
 root = tree.getroot()
 
-customers_data = []
+rows = []
 
 for customer in root.findall("customer"):
-    customers_data.append({
+    rows.append({
         "customer_id": customer.find("customer_id").text,
         "customer_name": customer.find("customer_name").text,
+        "gender": customer.find("gender").text,
         "city": customer.find("city").text,
-        "gender": customer.find("gender").text
+        "signup_date": customer.find("signup_date").text
     })
 
-customers = pd.DataFrame(customers_data)
+df = pd.DataFrame(rows)
 
-customers["source_file"] = "customers.xml"
-customers["batch_id"] = 1
-customers["load_timestamp"] = pd.Timestamp.now()
+df["source_file"] = "customers.xml"
+df["batch_id"] = 1
+df["load_timestamp"] = datetime.now()
 
-print("Customers rows:", len(customers))
-print(customers.head())
+engine = create_engine(
+    "postgresql+psycopg2://postgres:root@localhost:5432/uber_dw"
+)
 
-print("Clearing old bronze.customer_raw...")
-
-with engine.begin() as conn:
-    conn.exec_driver_sql("TRUNCATE TABLE bronze.customer_raw RESTART IDENTITY CASCADE")
-
-print("Loading customers into PostgreSQL...")
-
-customers.to_sql(
-    "customer_raw",
+df.to_sql(
+    name="customer_raw",
     schema="bronze",
     con=engine,
     if_exists="append",
     index=False,
-    chunksize=1000,
     method="multi"
 )
 
-print("Customers loaded successfully!")
+print("Customer data loaded successfully!")
