@@ -145,3 +145,54 @@ Power BI dashboards were created to analyze executive KPIs, revenue trends, and 
 ## Architecture
 
 Raw Data → Bronze Layer → Silver Layer → Gold Layer → Analytics Marts → Power BI Dashboard
+
+        ↓
+Python Ingestion Scripts
+        ↓
+PostgreSQL Bronze Layer
+        ↓
+Data Validation
+        ↓
+Silver Cleaned Layer
+        ↓
+Gold Star Schema
+        ↓
+Analytics Marts
+        ↓
+Power BI Dashboards
+
+AIrflow and docker
+Windows
+↓
+Docker Desktop
+↓
+Airflow containers
+↓
+Your Uber pipeline scripts
+↓
+PostgreSQL
+↓
+Power BI dashboards
+
+Final architecture after Airflow + Docker
+
+Raw Files
+CSV / JSON / XML / Weather CSV
+        ↓
+Dockerized PostgreSQL
+        ↓
+Airflow DAG
+        ↓
+Bronze Ingestion
+        ↓
+Data Validation
+        ↓
+Silver Transformation
+        ↓
+Trip Enrichment
+        ↓
+Gold Dimension + Fact Load
+        ↓
+Analytics Marts
+        ↓
+Power BI Dashboards
