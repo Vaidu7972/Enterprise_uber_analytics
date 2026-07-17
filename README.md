@@ -196,3 +196,34 @@ Gold Dimension + Fact Load
 Analytics Marts
         ↓
 Power BI Dashboards
+
+## Airflow and Docker Orchestration
+
+This project uses Docker and Apache Airflow to automate the complete Uber Analytics Data Pipeline.
+
+The Airflow DAG performs:
+
+1. Raw data ingestion into Bronze layer
+2. Data cleaning and validation into Silver layer
+3. Enriched trip creation
+4. Gold dimension and fact table loading
+5. Analytics mart creation for Power BI dashboards
+
+### Airflow DAG
+
+DAG Name:
+
+`enterprise_uber_analytics_pipeline`
+
+### Docker Services
+
+- PostgreSQL project database
+- Airflow metadata PostgreSQL database
+- Airflow webserver
+- Airflow scheduler
+
+### Run Commands
+
+```bash
+docker compose build
+docker compose up
