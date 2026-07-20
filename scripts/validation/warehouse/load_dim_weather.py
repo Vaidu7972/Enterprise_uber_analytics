@@ -16,17 +16,11 @@ weather = pd.read_sql(
             wind_speed
         FROM silver.weather_clean
         WHERE weather_date IS NOT NULL
-        ORDER BY weather_date
     """),
     engine
 )
 
-weather["weather_date"] = pd.to_datetime(
-    weather["weather_date"],
-    errors="coerce"
-).dt.date
-
-weather = weather.drop_duplicates(subset=["weather_date"]).copy()
+weather["weather_date"] = pd.to_datetime(weather["weather_date"]).dt.date
 
 weather = weather[
     [
@@ -38,19 +32,12 @@ weather = weather[
     ]
 ]
 
-print("Clearing old gold weather/fact data...")
-
 with engine.begin() as conn:
     conn.execute(text("TRUNCATE TABLE gold.fact_trip RESTART IDENTITY CASCADE"))
-    conn.execute(text("TRUNCATE TABLE gold.driver_performance_mart RESTART IDENTITY CASCADE"))
-    conn.execute(text("TRUNCATE TABLE gold.revenue_mart RESTART IDENTITY CASCADE"))
-    conn.execute(text("TRUNCATE TABLE gold.kpi_summary RESTART IDENTITY CASCADE"))
     conn.execute(text("TRUNCATE TABLE gold.dim_weather RESTART IDENTITY CASCADE"))
 
-print("Loading gold.dim_weather...")
-
 weather.to_sql(
-    name="dim_weather",
+    "dim_weather",
     schema="gold",
     con=engine,
     if_exists="append",

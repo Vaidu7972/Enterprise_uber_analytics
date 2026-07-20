@@ -1,39 +1,57 @@
 import pandas as pd
 import xml.etree.ElementTree as ET
-from sqlalchemy import create_engine
-from datetime import datetime
+from pathlib import Path
+from utils.db_connection import get_engine
 
-tree = ET.parse("data/raw/customers.xml")
+engine = get_engine()
+
+print("Reading customers.xml...")
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+file_path = BASE_DIR / "data" / "raw" / "customers.xml"
+
+if not file_path.exists():
+    raise FileNotFoundError(f"Customer file not found: {file_path}")
+
+tree = ET.parse(file_path)
 root = tree.getroot()
 
-rows = []
+customers_data = []
 
 for customer in root.findall("customer"):
-    rows.append({
-        "customer_id": customer.find("customer_id").text,
-        "customer_name": customer.find("customer_name").text,
-        "gender": customer.find("gender").text,
-        "city": customer.find("city").text,
-        "signup_date": customer.find("signup_date").text
-    })
+    customers_data.append(
+        {
+            "customer_id": customer.find("customer_id").text,
+            "customer_name": customer.find("customer_name").text,
+            "city": customer.find("city").text,
+            "gender": customer.find("gender").text,
+        }
+    )
 
-df = pd.DataFrame(rows)
+customers = pd.DataFrame(customers_data)
 
-df["source_file"] = "customers.xml"
-df["batch_id"] = 1
-df["load_timestamp"] = datetime.now()
+customers["source_file"] = "customers.xml"
+customers["batch_id"] = 1
+customers["load_timestamp"] = pd.Timestamp.now()
 
-engine = create_engine(
-    "postgresql+psycopg2://postgres:root@localhost:5432/uber_dw"
-)
+print("Customers rows:", len(customers))
+print(customers.head())
 
-df.to_sql(
+print("Clearing old bronze.customer_raw...")
+
+with engine.begin() as conn:
+    conn.exec_driver_sql("TRUNCATE TABLE bronze.customer_raw RESTART IDENTITY CASCADE")
+
+print("Loading customers into PostgreSQL...")
+
+customers.to_sql(
     name="customer_raw",
     schema="bronze",
     con=engine,
     if_exists="append",
     index=False,
-    method="multi"
+    chunksize=1000,
+    method="multi",
 )
 
-print("Customer data loaded successfully!")
+print("Customers loaded successfully!")

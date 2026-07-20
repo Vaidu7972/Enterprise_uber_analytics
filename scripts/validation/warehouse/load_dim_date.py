@@ -17,10 +17,7 @@ dates = pd.read_sql(
     engine
 )
 
-print("Dates found from silver.trip_clean:", len(dates))
-
-dates["date_key"] = pd.to_datetime(dates["date_key"], errors="coerce")
-
+dates["date_key"] = pd.to_datetime(dates["date_key"])
 dates["day"] = dates["date_key"].dt.day
 dates["month"] = dates["date_key"].dt.month
 dates["year"] = dates["date_key"].dt.year
@@ -28,10 +25,7 @@ dates["weekday"] = dates["date_key"].dt.day_name()
 dates["week_number"] = dates["date_key"].dt.isocalendar().week.astype(int)
 dates["quarter"] = dates["date_key"].dt.quarter
 dates["is_weekend"] = dates["weekday"].isin(["Saturday", "Sunday"])
-
 dates["date_key"] = dates["date_key"].dt.date
-
-dates = dates.drop_duplicates(subset=["date_key"]).copy()
 
 dates = dates[
     [
@@ -46,19 +40,12 @@ dates = dates[
     ]
 ]
 
-print("Clearing old gold date/fact data...")
-
 with engine.begin() as conn:
     conn.execute(text("TRUNCATE TABLE gold.fact_trip RESTART IDENTITY CASCADE"))
-    conn.execute(text("TRUNCATE TABLE gold.driver_performance_mart RESTART IDENTITY CASCADE"))
-    conn.execute(text("TRUNCATE TABLE gold.revenue_mart RESTART IDENTITY CASCADE"))
-    conn.execute(text("TRUNCATE TABLE gold.kpi_summary RESTART IDENTITY CASCADE"))
     conn.execute(text("TRUNCATE TABLE gold.dim_date CASCADE"))
 
-print("Loading gold.dim_date...")
-
 dates.to_sql(
-    name="dim_date",
+    "dim_date",
     schema="gold",
     con=engine,
     if_exists="append",
