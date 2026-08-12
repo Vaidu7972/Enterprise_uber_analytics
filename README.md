@@ -227,3 +227,6 @@ DAG Name:
 ```bash
 docker compose build
 docker compose up
+docker compose  up -d         (to start)
+docker compose  ps
+docker compose down           (to shutdown)
