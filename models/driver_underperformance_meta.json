@@ -16,13 +16,13 @@
     "f1_score": 1.0,
     "roc_auc": 1.0
   },
-  "sample_count": 5000,
+  "sample_count": 5001,
   "importances": {
-    "rating": 0.9745010070556313,
-    "total_trips": 0.0001783376765023471,
-    "total_revenue": 0.0049690586275103355,
-    "average_fare": 0.006225354743794083,
-    "average_distance": 0.007308922983706189,
-    "average_duration": 0.006817318912855885
+    "rating": 0.9513184925732185,
+    "total_trips": 0.0014890175625776015,
+    "total_revenue": 0.009387277155787336,
+    "average_fare": 0.009239738990307785,
+    "average_distance": 0.017500323873117948,
+    "average_duration": 0.011065149844990662
   }
 }
