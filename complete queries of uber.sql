@@ -1,4 +1,3 @@
-
 -- ===========================================================
 -- ENTERPRISE UBER ANALYTICS DATABASE SETUP
 -- Run this inside uber_dw database
@@ -8,9 +7,32 @@
 -- CREATE SCHEMAS
 -- ===========================================================
 
+CREATE SCHEMA IF NOT EXISTS audit;
 CREATE SCHEMA IF NOT EXISTS bronze;
 CREATE SCHEMA IF NOT EXISTS silver;
 CREATE SCHEMA IF NOT EXISTS gold;
+
+-- ===========================================================
+-- AUDIT LAYER TABLES
+-- ===========================================================
+
+CREATE TABLE IF NOT EXISTS audit.etl_batch_log
+(
+    batch_id SERIAL PRIMARY KEY,
+    pipeline_name VARCHAR(100),
+    task_name VARCHAR(100),
+    source_name VARCHAR(150),
+    target_table VARCHAR(150),
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_time TIMESTAMP,
+    status VARCHAR(30),
+    rows_read INT DEFAULT 0,
+    rows_inserted INT DEFAULT 0,
+    rows_updated INT DEFAULT 0,
+    rows_rejected INT DEFAULT 0,
+    last_watermark TIMESTAMP,
+    error_message TEXT
+);
 
 -- ===========================================================
 -- BRONZE LAYER TABLES
@@ -190,7 +212,7 @@ DROP TABLE IF EXISTS gold.dim_date CASCADE;
 CREATE TABLE gold.dim_driver
 (
     driver_key SERIAL PRIMARY KEY,
-    driver_id VARCHAR(50) UNIQUE NOT NULL,
+    driver_id VARCHAR(50) NOT NULL,
     driver_name VARCHAR(200),
     city VARCHAR(100),
     rating NUMERIC(3,2),
@@ -208,7 +230,9 @@ CREATE TABLE gold.dim_customer
     gender VARCHAR(20),
     effective_date DATE,
     end_date DATE,
-    is_current BOOLEAN
+    is_current BOOLEAN,
+    previous_city VARCHAR(100),
+    city_change_date DATE
 );
 
 CREATE TABLE gold.dim_weather
@@ -263,6 +287,18 @@ CREATE TABLE gold.fact_trip
 );
 
 -- ===========================================================
+-- ALTER TABLE MIGRATION STATEMENTS (Safe for existing tables)
+-- ===========================================================
+
+-- Remove UNIQUE constraint on driver_id for SCD Type 2
+ALTER TABLE gold.dim_driver DROP CONSTRAINT IF EXISTS dim_driver_driver_id_key;
+ALTER TABLE gold.dim_driver DROP CONSTRAINT IF EXISTS gold_dim_driver_driver_id_key;
+
+-- Add SCD Type 3 columns to dim_customer
+ALTER TABLE gold.dim_customer ADD COLUMN IF NOT EXISTS previous_city VARCHAR(100);
+ALTER TABLE gold.dim_customer ADD COLUMN IF NOT EXISTS city_change_date DATE;
+
+-- ===========================================================
 -- ANALYTICS MART TABLES
 -- ===========================================================
 
@@ -290,7 +326,7 @@ CREATE TABLE gold.revenue_mart
     is_weekend BOOLEAN,
     total_trips BIGINT,
     total_revenue NUMERIC(12,2),
-    average_fare NUMERIC(10,2),
+    average_fare NUMERIC(12,2),
     average_distance NUMERIC(10,2)
 );
 
@@ -316,98 +352,5 @@ SELECT
     table_schema,
     table_name
 FROM information_schema.tables
-WHERE table_schema IN ('bronze', 'silver', 'gold')
+WHERE table_schema IN ('audit', 'bronze', 'silver', 'gold')
 ORDER BY table_schema, table_name;
-
-SELECT COUNT(*) FROM bronze.trip_raw;        --2964624
-SELECT COUNT(*) FROM bronze.driver_raw;      --5000
-SELECT COUNT(*) FROM bronze.customer_raw;    --5000
-SELECT COUNT(*) FROM bronze.weather_raw;     --366
-
-SELECT COUNT(*) FROM silver.trip_clean;      --9492
-SELECT COUNT(*) FROM silver.trip_rejected;   --508
-SELECT COUNT(*) FROM silver.driver_clean;    --5000
-SELECT COUNT(*) FROM silver.customer_clean;  --5000
-SELECT COUNT(*) FROM silver.weather_clean;   --366
-SELECT COUNT(*) FROM silver.trip_enriched;   --0
-
-SHOW port;
-SELECT current_database(), current_user;
-ALTER USER postgres WITH PASSWORD 'root';
-SELECT 'Password reset done' AS status;
-
-SELECT COUNT(*) FROM silver.trip_enriched;
-SELECT * FROM silver.trip_enriched LIMIT 5;
-
-SELECT COUNT(*) FROM gold.dim_driver;
-SELECT COUNT(*) FROM gold.dim_customer;
-SELECT COUNT(*) FROM gold.dim_weather;
-SELECT COUNT(*) FROM gold.dim_date;
-
-SELECT 
-    DATE(pickup_datetime) AS trip_date,
-    COUNT(*) AS total_trips
-FROM silver.trip_clean
-GROUP BY DATE(pickup_datetime)
-ORDER BY trip_date;
-
-TRUNCATE TABLE silver.trip_clean CASCADE;
-TRUNCATE TABLE silver.trip_rejected CASCADE;
-TRUNCATE TABLE silver.trip_enriched CASCADE;
-
-TRUNCATE TABLE gold.fact_trip RESTART IDENTITY CASCADE;
-TRUNCATE TABLE gold.dim_driver RESTART IDENTITY CASCADE;
-TRUNCATE TABLE gold.dim_customer RESTART IDENTITY CASCADE;
-TRUNCATE TABLE gold.dim_weather RESTART IDENTITY CASCADE;
-TRUNCATE TABLE gold.dim_date CASCADE;
-
-TRUNCATE TABLE gold.kpi_summary;
-TRUNCATE TABLE gold.revenue_mart;
-TRUNCATE TABLE gold.driver_performance_mart;
-
-SELECT 
-    DATE(pickup_datetime) AS trip_date,
-    COUNT(*) AS total_trips
-FROM silver.trip_clean
-GROUP BY DATE(pickup_datetime)
-ORDER BY trip_date;
-
-SELECT 
-    date_key,
-    total_trips,
-    total_revenue
-FROM gold.revenue_mart
-ORDER BY date_key;
-
-SELECT 
-    date_key,
-    total_trips,
-    total_revenue
-FROM gold.revenue_mart
-ORDER BY date_key;
-
---Final verification
-SELECT 'silver.trip_clean' AS table_name, COUNT(*) FROM silver.trip_clean
-UNION ALL
-SELECT 'silver.trip_enriched', COUNT(*) FROM silver.trip_enriched
-UNION ALL
-SELECT 'gold.dim_driver', COUNT(*) FROM gold.dim_driver
-UNION ALL
-SELECT 'gold.dim_customer', COUNT(*) FROM gold.dim_customer
-UNION ALL
-SELECT 'gold.dim_weather', COUNT(*) FROM gold.dim_weather
-UNION ALL
-SELECT 'gold.dim_date', COUNT(*) FROM gold.dim_date
-UNION ALL
-SELECT 'gold.fact_trip', COUNT(*) FROM gold.fact_trip
-UNION ALL
-SELECT 'gold.revenue_mart', COUNT(*) FROM gold.revenue_mart
-UNION ALL
-SELECT 'gold.driver_performance_mart', COUNT(*) FROM gold.driver_performance_mart;
-
-SELECT 
-    date_key,
-    total_trips,
-    total_revenue
-FROM gold.revenue_mart
-ORDER BY date_key;
