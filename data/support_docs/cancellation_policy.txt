@@ -1,0 +1,13 @@
+DRIVER CANCELLATION POLICY
+
+Drivers should avoid unnecessary trip cancellations.
+
+Repeated cancellations may affect driver performance
+metrics.
+
+A driver may cancel a trip when there is a legitimate
+safety issue, incorrect pickup information, or another
+documented operational reason.
+
+Repeated cancellation behaviour may require additional
+review or training.

@@ -1,0 +1,11 @@
+DRIVER ONBOARDING POLICY
+
+A driver must provide a valid driving licence,
+vehicle registration certificate, valid vehicle insurance,
+identity proof, and bank account details.
+
+All submitted documents must be valid at the time
+of account activation.
+
+Drivers must complete identity verification and
+basic platform safety training before activation.

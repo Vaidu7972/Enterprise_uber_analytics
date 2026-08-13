@@ -1,0 +1,28 @@
+{
+  "model_type": "RandomForestClassifier",
+  "features": [
+    "rating",
+    "total_trips",
+    "total_revenue",
+    "average_fare",
+    "average_distance",
+    "average_duration"
+  ],
+  "target": "underperformance_risk",
+  "metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0
+  },
+  "sample_count": 5000,
+  "importances": {
+    "rating": 0.9745010070556313,
+    "total_trips": 0.0001783376765023471,
+    "total_revenue": 0.0049690586275103355,
+    "average_fare": 0.006225354743794083,
+    "average_distance": 0.007308922983706189,
+    "average_duration": 0.006817318912855885
+  }
+}

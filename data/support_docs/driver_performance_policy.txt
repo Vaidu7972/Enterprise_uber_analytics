@@ -1,0 +1,11 @@
+DRIVER PERFORMANCE AND UNDERPERFORMANCE POLICY
+
+Drivers are evaluated on key metrics including overall passenger rating, trip completion rate, monthly trip volume, and customer feedback.
+
+A driver with a rating below 4.5 or high cancellation rates is flagged for underperformance risk.
+
+When a driver is identified as underperforming:
+1. Operations reviews recent trip logs and customer ratings.
+2. If driver risk level is Medium or High, mandatory refresher driver training is assigned.
+3. Drivers are monitored for 14 days following training.
+4. Continued underperformance may lead to temporary account suspension or formal manual review.

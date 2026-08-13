@@ -1,232 +1,123 @@
-## Power BI Dashboard
-Enterprise Uber Analytics Data Platform
-Project Objective
+# UberOps AI — Enterprise Agentic Data Intelligence & Support Platform
 
-Build an end-to-end Data Engineering pipeline using:
+> **UberOps AI** is an end-to-end Enterprise Data Engineering + Business Intelligence + RAG + Predictive Machine Learning + LangGraph Multi-Agent AI Platform built over a PostgreSQL Gold Data Warehouse.
 
-Python
-PostgreSQL
-Great Expectations
-Airflow
-Docker
-Power BI
+---
 
-Following the Medallion Architecture:
+## 🌟 Architecture Overview
 
-Raw Sources
-    ↓
-Bronze Layer
-    ↓
-Data Quality
-    ↓
-Silver Layer
-    ↓
-Gold Layer
-    ↓
-Analytics Dashboard
+```text
+                                USER / MANAGER
+                                      │
+                                      ▼
+                               STREAMLIT UI
+                                      │
+                                      ▼
+                          LANGGRAPH SUPERVISOR AGENT
+                                      │
+                             Intent Classification
+                                      │
+         ┌────────────────────────────┼────────────────────────────┐
+         │                            │                            │
+         ▼                            ▼                            ▼
+    GENERAL AI                    DATA AGENT                 SUPPORT AGENT
+         │                            │                            │
+  Gemini 3.6 Flash                 SQL Tool                   Hybrid RAG Engine
+                                      │                            │
+                                      ▼                            ▼
+                               PostgreSQL Gold                 ChromaDB
+                                      │                            │
+                                      └─────────────┬──────────────┘
+                                                    ▼
+                                                 ML AGENT
+                                                    │
+                                           RandomForest Risk Model
+                                                    │
+                                                    ▼
+                                              INSIGHT ENGINE
+                                                    │
+                                         RECOMMENDATION ENGINE
+                                                    │
+                                        HUMAN-IN-THE-LOOP APPROVAL
+                                                    │
+                                                    ▼
+                                      Persisted Audit Log & Reports
+```
 
-## Completed Work
-### Phase 1 - Project Setup
-- Created project folder structure
-- Initialized Git repository
-- Configured Python virtual environment
+---
 
-### Phase 2 - Data Acquisition
-- Downloaded NYC TLC Yellow Taxi dataset
-- Added Taxi Zone lookup data
+## 🛠️ Technology Stack
 
-### Phase 3 - Data Warehouse Setup
-- Installed PostgreSQL
-- Created database: uber_dw
-- Created schemas:
-  - bronze
-  - silver
-  - gold
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Data Engineering** | Python, Pandas, PostgreSQL, SQLAlchemy, psycopg2, Parquet, JSON, XML, Airflow, Docker |
+| **GenAI / LLM** | Google Gemini (`google-genai`), System Instructions, Structured Pydantic Outputs |
+| **Hybrid RAG** | `pypdf`, Gemini Embeddings (`gemini-embedding-001`), ChromaDB Vector Store, Semantic + Keyword Retrieval |
+| **Predictive ML** | `scikit-learn` (RandomForestClassifier), `joblib`, Feature Engineering, Real Warehouse Inference |
+| **Multi-Agent Orchestration** | LangGraph, AgentState, Supervisor Routing, Retry/Error Recovery, Human-In-The-Loop Workflow |
+| **User Interface** | Streamlit (7-Tab Enterprise Dark Mode Dashboard) |
+| **Reporting & Audit** | ReportLab (PDF Export), PostgreSQL Audit Tables (`gold.agent_audit_logs`, `gold.action_logs`) |
 
-### Phase 4 - Bronze Layer Development
+---
 
-#### Trip Data
-- Created bronze.trip_raw
-- Loaded 2.69M NYC taxi trip records
-- Added metadata columns:
-  - source_file
-  - batch_id
-  - load_timestamp
+## 🚀 Key Features
 
-#### Driver Data
-- Generated synthetic driver dataset (JSON)
-- Created bronze.driver_raw
-- Loaded 5000 driver records
+1. **Bronze → Silver → Gold Data Pipeline**: Preserves transactional integrity across customers, drivers, weather, and trips.
+2. **Dynamic Schema Discovery & Read-Only SQL Safety**: Data Agent queries real PostgreSQL `information_schema.columns` and enforces strict read-only query security.
+3. **Hybrid RAG Support Agent**: Combines semantic vector similarity with keyword matching to answer operational policy questions with exact source attribution.
+4. **Predictive Driver Risk ML Engine**: Real machine learning model predicting driver underperformance risk using driver rating, trip volume, revenue, and trip duration metrics.
+5. **LangGraph Multi-Agent Orchestration**: StateGraph coordination across General AI, Data Agent, Support Agent, and ML Agent with automatic fallback and error retries.
+6. **Insight & Recommendation Engines**: Computes quantitative variance and formulates actionable business recommendations.
+7. **Human-In-The-Loop Action Approval**: Sensitive operational recommendations (e.g. driver coaching assignment) require explicit manager approval before persisting.
+8. **Exportable PDF Reports**: One-click generation of formal executive PDF investigation reports.
 
-#### Customer Data
-- Generated synthetic customer dataset (XML)
-- Created bronze.customer_raw
-- Loaded 5000 customer records
+---
 
-#### Weather Data
-- Generated weather dataset (CSV)
-- Created bronze.weather_raw
-- Loaded 366 weather records
+## 💻 Quick Start & Running Instructions
 
-The project includes a Power BI dashboard connected to the PostgreSQL Gold Layer and Analytics Mart tables.
+### 1. Prerequisites
+- Python 3.12+
+- PostgreSQL database running on `localhost:5432` with database `uber_dw`
 
-### Dashboard Pages
+### 2. Environment Configuration
+Ensure `.env` contains:
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=uber_dw
+DB_USER=postgres
+DB_PASSWORD=root
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-3.6-flash
+GEMINI_EMBEDDING_MODEL=gemini-embedding-001
+```
 
-1. Executive Dashboard
-   - Total Revenue
-   - Total Trips
-   - Average Fare
-   - Average Distance
-   - Average Trip Duration
-   - Revenue Trend by Date
-   - Weekend vs Weekday Trips
-   - Top Drivers by Revenue
-
-2. Revenue Analysis Dashboard
-   - Daily Revenue Trend
-   - Daily Trip Count
-   - Weekend vs Weekday Revenue
-   - Revenue by Weekday
-   - Daily Revenue Summary
-
-3. Driver Performance Dashboard
-   - Total Drivers
-   - Total Trips
-   - Total Revenue
-   - Average Driver Rating
-   - Average Trip Duration
-   - Top Drivers by Revenue
-   - Trips by Driver
-   - Driver Rating vs Revenue
-   - Driver Performance Summary
-
-### Data Source
-
-The dashboard uses the following PostgreSQL tables:
-
-- `gold.fact_trip`
-- `gold.dim_driver`
-- `gold.dim_customer`
-- `gold.dim_weather`
-- `gold.dim_date`
-- `gold.revenue_mart`
-- `gold.driver_performance_mart`
-
-### Dashboard File
-
-The Power BI dashboard file is available at:
-
-`dashboards/Enterprise_Uber_Analytics_Dashboard.pbix`
-
-## Project Summary
-
-Enterprise Uber Analytics Data Platform is an end-to-end data engineering and analytics project built using Python, PostgreSQL, SQL, and Power BI.
-
-The project follows Medallion Architecture with Bronze, Silver, and Gold layers. Raw Uber trip, driver, customer, and weather data are ingested into PostgreSQL, cleaned and transformed using Python, and modeled into fact and dimension tables for analytics.
-
-Power BI dashboards were created to analyze executive KPIs, revenue trends, and driver performance.
-
-## Dashboards
-
-1. Executive Dashboard
-2. Revenue Analysis Dashboard
-3. Driver Performance Dashboard
-
-## Tech Stack
-
-- Python
-- Pandas
-- PostgreSQL
-- SQL
-- Power BI
-- GitHub
-- VS Code
-
-## Architecture
-
-Raw Data → Bronze Layer → Silver Layer → Gold Layer → Analytics Marts → Power BI Dashboard
-
-        ↓
-Python Ingestion Scripts
-        ↓
-PostgreSQL Bronze Layer
-        ↓
-Data Validation
-        ↓
-Silver Cleaned Layer
-        ↓
-Gold Star Schema
-        ↓
-Analytics Marts
-        ↓
-Power BI Dashboards
-
-AIrflow and docker
-Windows
-↓
-Docker Desktop
-↓
-Airflow containers
-↓
-Your Uber pipeline scripts
-↓
-PostgreSQL
-↓
-Power BI dashboards
-
-Final architecture after Airflow + Docker
-
-Raw Files
-CSV / JSON / XML / Weather CSV
-        ↓
-Dockerized PostgreSQL
-        ↓
-Airflow DAG
-        ↓
-Bronze Ingestion
-        ↓
-Data Validation
-        ↓
-Silver Transformation
-        ↓
-Trip Enrichment
-        ↓
-Gold Dimension + Fact Load
-        ↓
-Analytics Marts
-        ↓
-Power BI Dashboards
-
-## Airflow and Docker Orchestration
-
-This project uses Docker and Apache Airflow to automate the complete Uber Analytics Data Pipeline.
-
-The Airflow DAG performs:
-
-1. Raw data ingestion into Bronze layer
-2. Data cleaning and validation into Silver layer
-3. Enriched trip creation
-4. Gold dimension and fact table loading
-5. Analytics mart creation for Power BI dashboards
-
-### Airflow DAG
-
-DAG Name:
-
-`enterprise_uber_analytics_pipeline`
-
-### Docker Services
-
-- PostgreSQL project database
-- Airflow metadata PostgreSQL database
-- Airflow webserver
-- Airflow scheduler
-
-### Run Commands
-
+### 3. Build RAG Index
 ```bash
-docker compose build
-docker compose up
-docker compose  up -d         (to start)
-docker compose  ps
-docker compose down           (to shutdown)
+.venv312\Scripts\python.exe -m agentic_ai.rag.build_index
+```
+
+### 4. Train Predictive ML Model
+```bash
+.venv312\Scripts\python.exe -m agentic_ai.ml.train_model
+```
+
+### 5. Run Streamlit Application
+```bash
+.venv312\Scripts\streamlit.exe run streamlit_app.py
+```
+
+### 6. Run Master Automated Tests
+```bash
+.venv312\Scripts\python.exe tests/run_all_tests.py
+```
+
+---
+
+## ❓ Sample Prompts Across Agents
+
+* **General AI**: `What is ETL in data engineering?`
+* **Data Agent**: `What is total revenue in the warehouse?` | `Show top 5 drivers by revenue.`
+* **Support Agent (RAG)**: `What documents are required for driver onboarding?` | `What should a driver do after an accident?`
+* **ML Agent**: `Which drivers are at high risk of underperforming?`
+* **Multi-Agent**: `Why is driver D101 underperforming, is this likely to continue, and what training should be recommended?`

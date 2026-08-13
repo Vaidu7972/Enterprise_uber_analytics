@@ -1,0 +1,10 @@
+CUSTOMER SUPPORT FAQ AND POLICIES
+
+Q: How do fare estimates work?
+A: Fares are calculated using base fare, trip distance, duration, weather factors, and peak hour multipliers.
+
+Q: What happens if an item is lost during a ride?
+A: Riders can report lost items directly via the support tab. Drivers will be contacted by support to return items safely.
+
+Q: How can riders report driver misconduct?
+A: Safety concerns and driver misconduct can be reported immediately in the app or via the support escalation portal. Severe safety reports trigger immediate investigation.
