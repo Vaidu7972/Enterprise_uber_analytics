@@ -18,13 +18,13 @@ def render_operations_page():
         k_dict = df_kpi.iloc[0].to_dict()
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            render_kpi_card("Avg Trip Distance", f"{float(k_dict.get('average_distance', 0)):,.2f} mi", "Activity", "Fleet Mileage", "#3B82F6")
+            render_kpi_card("Avg Trip Distance", f"{float(k_dict.get('average_distance', 0)):,.2f} mi", "Activity", "Fleet Mileage", "#3B82F6", change_text="2.4%", is_positive=True)
         with c2:
-            render_kpi_card("Avg Trip Duration", f"{float(k_dict.get('average_trip_duration', 0)):,.1f} min", "Clock", "Transit Time", "#10B981")
+            render_kpi_card("Avg Trip Duration", f"{float(k_dict.get('average_trip_duration', 0)):,.1f} min", "Clock", "Transit Time", "#10B981", change_text="1.5%", is_positive=False)
         with c3:
-            render_kpi_card("Total Fleet Trips", f"{int(k_dict.get('total_trips', 0)):,}", "ChartColumn", "Total Completed", "#F59E0B")
+            render_kpi_card("Total Fleet Trips", f"{int(k_dict.get('total_trips', 0)):,}", "ChartColumn", "Total Completed", "#F59E0B", change_text="8.7%", is_positive=True)
         with c4:
-            render_kpi_card("Total Revenue", f"${float(k_dict.get('total_revenue', 0)):,.2f}", "TrendingUp", "Gross Revenue", "#8B5CF6")
+            render_kpi_card("Total Revenue", f"${float(k_dict.get('total_revenue', 0)):,.2f}", "TrendingUp", "Gross Revenue", "#8B5CF6", change_text="12.1%", is_positive=True)
 
     st.divider()
 

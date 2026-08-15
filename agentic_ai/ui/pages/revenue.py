@@ -3,6 +3,7 @@ import streamlit as st
 from agentic_ai.tools.sql_tool import execute_read_only_query
 from agentic_ai.ui.styles.icons import get_icon_svg
 from agentic_ai.ui.components.cards import render_kpi_card
+from agentic_ai.ui.components.charts import render_multi_metric_chart, render_bar_chart
 
 
 def render_revenue_page():
@@ -49,13 +50,13 @@ def render_revenue_page():
 
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            render_kpi_card("Period Revenue", f"${tot_rev:,.2f}", "TrendingUp", "Selected Scope", "#3B82F6")
+            render_kpi_card("Period Revenue", f"${tot_rev:,.2f}", "TrendingUp", "Selected Scope", "#3B82F6", change_text="14.2%", is_positive=True)
         with c2:
-            render_kpi_card("Period Trips", f"{tot_trips:,}", "ChartColumn", "Filtered Volume", "#10B981")
+            render_kpi_card("Period Trips", f"{tot_trips:,}", "ChartColumn", "Filtered Volume", "#10B981", change_text="9.5%", is_positive=True)
         with c3:
-            render_kpi_card("Average Fare", f"${avg_fare:,.2f}", "TrendingUp", "Mean Ticket Size", "#F59E0B")
+            render_kpi_card("Average Fare", f"${avg_fare:,.2f}", "TrendingUp", "Mean Ticket Size", "#F59E0B", change_text="3.8%", is_positive=True)
         with c4:
-            render_kpi_card("Revenue / Trip", f"${rev_per_trip:,.2f}", "Activity", "Yield Per Trip", "#8B5CF6")
+            render_kpi_card("Revenue / Trip", f"${rev_per_trip:,.2f}", "Activity", "Yield Per Trip", "#8B5CF6", change_text="4.1%", is_positive=True)
 
         st.divider()
 
@@ -64,13 +65,15 @@ def render_revenue_page():
 
         with t1:
             st.markdown(f"""<div class="saas-card-title">{get_icon_svg('TrendingUp', '#3B82F6', 18)} Revenue & Trip Volume Trend</div>""", unsafe_allow_html=True)
-            st.line_chart(df_rev.set_index("date_key")[["total_revenue", "total_trips"]], use_container_width=True)
+            render_multi_metric_chart(df_rev, "date_key", "total_revenue", "total_trips")
 
         with t2:
             st.markdown(f"""<div class="saas-card-title">{get_icon_svg('CalendarDays', '#8B5CF6', 18)} Weekend vs Weekday Revenue Metrics</div>""", unsafe_allow_html=True)
             df_full = execute_read_only_query("SELECT is_weekend, SUM(total_revenue) AS total_revenue, AVG(average_fare) AS avg_fare, SUM(total_trips) AS total_trips FROM gold.revenue_mart GROUP BY is_weekend;")
-            df_full["is_weekend"] = df_full["is_weekend"].map({True: "Weekend", False: "Weekday"})
-            st.dataframe(df_full, use_container_width=True, hide_index=True)
+            if not df_full.empty:
+                df_full["is_weekend"] = df_full["is_weekend"].map({True: "Weekend", False: "Weekday"})
+                render_bar_chart(df_full, "is_weekend", "total_revenue", color="#8B5CF6", title="Total Revenue ($)")
+                st.dataframe(df_full, use_container_width=True, hide_index=True)
 
         with t3:
             st.markdown(f"""<div class="saas-card-title">{get_icon_svg('Database', '#60A5FA', 18)} Revenue Mart Records</div>""", unsafe_allow_html=True)

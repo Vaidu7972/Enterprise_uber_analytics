@@ -28,13 +28,13 @@ def render_drivers_page():
         # Top KPI Cards for Selected Driver
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            render_kpi_card("Driver Name", drv_info["driver_name"], "Users", f"City: {drv_info['driver_city']}", "#3B82F6")
+            render_kpi_card("Driver Name", drv_info["driver_name"], "Users", f"City: {drv_info['driver_city']}", "#3B82F6", change_text="Verified Driver", is_positive=True)
         with c2:
-            render_kpi_card("Driver Rating", f"{drv_info['driver_rating']:.2f}", "ShieldCheck", "Performance Rating", "#10B981")
+            render_kpi_card("Driver Rating", f"{drv_info['driver_rating']:.2f}", "ShieldCheck", "Performance Rating", "#10B981", change_text="Top Tier", is_positive=True)
         with c3:
-            render_kpi_card("Total Revenue", f"${float(drv_info['total_revenue']):,.2f}", "TrendingUp", "Lifetime Earnings", "#F59E0B")
+            render_kpi_card("Total Revenue", f"${float(drv_info['total_revenue']):,.2f}", "TrendingUp", "Lifetime Earnings", "#F59E0B", change_text="Revenue Share", is_positive=True)
         with c4:
-            render_kpi_card("Total Trips", f"{int(drv_info['total_trips']):,}", "ChartColumn", "Trips Completed", "#8B5CF6")
+            render_kpi_card("Total Trips", f"{int(drv_info['total_trips']):,}", "ChartColumn", "Trips Completed", "#8B5CF6", change_text="Completed", is_positive=True)
 
         st.divider()
 

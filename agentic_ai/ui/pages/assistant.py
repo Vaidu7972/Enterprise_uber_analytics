@@ -3,7 +3,7 @@ from agentic_ai.agents.supervisor_agent import handle_question
 from agentic_ai.agents.report_agent import generate_executive_report
 from agentic_ai.ui.styles.icons import get_icon_svg
 from agentic_ai.ui.components.cards import render_starter_card
-from agentic_ai.ui.components.voice import render_voice_input_component
+from agentic_ai.ui.components.voice import render_voice_interface
 from agentic_ai.ui.components.chat import render_response_card
 
 
@@ -69,8 +69,8 @@ def render_assistant_page():
 
             st.divider()
 
-        # Web Speech Microphone Voice Component
-        render_voice_input_component()
+        # Voice Assistant Recorder & Player Component
+        voice_query = render_voice_interface()
 
         # Render Previous Chat Messages
         for idx, msg in enumerate(st.session_state.messages):
@@ -82,7 +82,7 @@ def render_assistant_page():
 
         # Input Query Field
         user_input = st.chat_input("Ask UberOps AI about revenue, drivers, policies, predictions...")
-        question = q_selected if 'q_selected' in locals() and q_selected else user_input
+        question = voice_query or (q_selected if 'q_selected' in locals() and q_selected else user_input)
 
         if question:
             st.session_state.messages.append({"role": "user", "content": question})

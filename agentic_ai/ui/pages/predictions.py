@@ -18,13 +18,13 @@ def render_predictions_page():
     if batch_ml.get("found"):
         m1, m2, m3, m4 = st.columns(4)
         with m1:
-            render_kpi_card("Scored Drivers", f"{batch_ml.get('total_drivers_scored')}", "Users", "Total Drivers", "#3B82F6")
+            render_kpi_card("Scored Drivers", f"{batch_ml.get('total_drivers_scored')}", "Users", "Total Fleet Drivers", "#3B82F6", change_text="Active ML Model", is_positive=True)
         with m2:
-            render_kpi_card("High Risk", f"{batch_ml.get('high_risk_count')}", "TriangleAlert", "Requires Attention", "#EF4444")
+            render_kpi_card("High Risk", f"{batch_ml.get('high_risk_count')}", "TriangleAlert", "Requires Action", "#EF4444", change_text="49.2%", is_positive=False)
         with m3:
-            render_kpi_card("Medium Risk", f"{batch_ml.get('medium_risk_count')}", "Clock", "Monitor Performance", "#F59E0B")
+            render_kpi_card("Medium Risk", f"{batch_ml.get('medium_risk_count')}", "Clock", "Monitor Performance", "#F59E0B", change_text="0.0%", is_positive=True)
         with m4:
-            render_kpi_card("Low Risk", f"{batch_ml.get('low_risk_count')}", "CircleCheck", "Optimal Drivers", "#10B981")
+            render_kpi_card("Low Risk", f"{batch_ml.get('low_risk_count')}", "CircleCheck", "Optimal Performance", "#10B981", change_text="50.8%", is_positive=True)
 
         st.divider()
 

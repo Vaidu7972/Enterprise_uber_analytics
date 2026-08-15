@@ -1,7 +1,8 @@
 import pandas as pd
 import streamlit as st
 from agentic_ai.ui.styles.icons import get_icon_svg
-from agentic_ai.ui.components.voice import render_tts_audio_player
+from agentic_ai.ui.components.voice import generate_audio_reply
+from agentic_ai.ui.components.charts import render_area_chart, render_bar_chart
 
 
 AGENT_BADGES = {
@@ -17,32 +18,34 @@ AGENT_BADGES = {
 def get_agent_badge_html(route: str) -> str:
     """Return active agent Lucide SVG badge HTML."""
     icon_name, label, color = AGENT_BADGES.get(route, ("Bot", route.upper(), "#64748B"))
-    return f"""
-    <div class="agent-badge" style="background:rgba(59,130,246,0.12); color:{color}; border-color:{color}44;">
-        {get_icon_svg(icon_name, color, 14)}
-        <span>{label}</span>
-    </div>
-    """
+    return (
+        f'<div class="agent-badge" style="background:rgba(59,130,246,0.12); color:{color}; border-color:{color}44;">'
+        f'{get_icon_svg(icon_name, color, 14)}'
+        f'<span>{label}</span>'
+        f'</div>'
+    )
 
 
 def render_response_card(result: dict, index: int = 0):
     """
-    Render structured SaaS assistant response card with tabs:
+    Render structured SaaS assistant response card with tabs & audio speech playback:
     [Answer | Data | Visualization | SQL | Agent Trace]
     """
     route = result.get("route", "general")
     st.markdown(get_agent_badge_html(route), unsafe_allow_html=True)
 
-    # 1. Main Business Answer
-    st.markdown(result.get("answer", ""))
+    answer_text = result.get("answer", "")
+    st.markdown(answer_text)
 
-    # TTS Audio Player
-    if result.get("answer"):
-        render_tts_audio_player(result["answer"], key_suffix=f"res_{index}")
+    # Generated MP3 Speech Audio Response Player
+    if answer_text:
+        audio_bytes = generate_audio_reply(answer_text)
+        if audio_bytes:
+            st.audio(audio_bytes, format="audio/mp3", autoplay=False)
 
     st.divider()
 
-    # 2. Response Tabs
+    # Response Tabs
     has_data = result.get("data") is not None and isinstance(result["data"], pd.DataFrame) and not result["data"].empty
     has_sql = bool(result.get("sql"))
     has_trace = bool(result.get("trace_steps"))
@@ -68,7 +71,7 @@ def render_response_card(result: dict, index: int = 0):
         if result.get("recommendations"):
             st.success(f"**Recommended Action:** {result['recommendations']}")
         if not result.get("insights") and not result.get("recommendations"):
-            st.write("Response generated directly from PostgreSQL Gold data and AI tools.")
+            st.write("Response generated directly from PostgreSQL Gold data and AI multi-agent orchestration.")
 
     # Data Table Tab
     if has_data:
@@ -90,8 +93,12 @@ def render_response_card(result: dict, index: int = 0):
             tab_idx += 1
             if len(df) > 1:
                 numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
+                str_cols = df.select_dtypes(include=['object', 'string', 'datetime']).columns.tolist()
+                x_col = str_cols[0] if str_cols else df.columns[0]
+                y_col = numeric_cols[0] if numeric_cols else df.columns[1]
+
                 if numeric_cols:
-                    st.line_chart(df[numeric_cols], use_container_width=True)
+                    render_area_chart(df, x_col=x_col, y_col=y_col, height=260)
                 else:
                     st.info("Chart view is not available for this data shape.")
             else:

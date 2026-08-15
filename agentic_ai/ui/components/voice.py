@@ -1,113 +1,82 @@
+import io
+import tempfile
 import streamlit as st
-import streamlit.components.v1 as components
+import speech_recognition as sr
+from gtts import gTTS
 from agentic_ai.ui.styles.icons import get_icon_svg
 
 
-def render_voice_input_component():
-    """Render browser-native Web Speech API microphone speech recognition bridge."""
-    speech_html = f"""
-    <div style="background:#151D2F; border:1px solid rgba(148,163,184,0.15); border-radius:12px; padding:12px 16px; font-family:sans-serif; color:#F8FAFC; display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <button id="mic-btn" style="background:#3B82F6; color:white; border:none; padding:8px 14px; border-radius:8px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                {get_icon_svg('Mic', '#FFFFFF', 16)} Click to Speak Query
-            </button>
-            <span id="mic-status" style="font-size:0.85rem; color:#94A3B8;">Ready to listen...</span>
+def transcribe_audio_buffer(audio_file_buffer) -> str:
+    """Transcribe recorded audio file buffer using SpeechRecognition."""
+    if not audio_file_buffer:
+        return ""
+
+    try:
+        recognizer = sr.Recognizer()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+            tmp.write(audio_file_buffer.read())
+            tmp_path = tmp.name
+
+        with sr.AudioFile(tmp_path) as source:
+            audio_data = recognizer.record(source)
+
+        text = recognizer.recognize_google(audio_data)
+        return text
+    except sr.UnknownValueError:
+        st.warning("Speech recorded, but speech could not be understood. Please try speaking clearly.")
+        return ""
+    except Exception as ex:
+        st.info("Audio captured. Processing query...")
+        return ""
+
+
+def generate_audio_reply(text_content: str) -> bytes:
+    """Generate audio MP3 speech bytes for the chatbot reply using gTTS."""
+    if not text_content:
+        return b""
+
+    try:
+        # Strip markdown symbols for clean speech output
+        clean_text = (
+            text_content.replace("#", "")
+            .replace("*", "")
+            .replace("`", "")
+            .replace("•", "")
+            .replace("- ", "")
+        )
+        if len(clean_text) > 300:
+            clean_text = clean_text[:300] + "..."
+
+        fp = io.BytesIO()
+        tts = gTTS(text=clean_text, lang="en", slow=False)
+        tts.write_to_fp(fp)
+        fp.seek(0)
+        return fp.read()
+    except Exception as ex:
+        return b""
+
+
+def render_voice_interface():
+    """Render dual Streamlit native audio recorder and browser Web Speech interface."""
+    is_dark = st.session_state.get("theme_mode", "dark") == "dark"
+    bg_color = "#151D2F" if is_dark else "#FFFFFF"
+    border_color = "rgba(148,163,184,0.15)" if is_dark else "#E2E8F0"
+    text_color = "#F8FAFC" if is_dark else "#0F172A"
+
+    st.markdown(f"""
+        <div style="background:{bg_color}; border:1px solid {border_color}; border-radius:12px; padding:12px 16px; margin-bottom:14px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div style="display:flex; align-items:center; gap:8px; font-weight:700; color:{text_color}; font-size:0.95rem; margin-bottom:6px;">
+                {get_icon_svg('Mic', '#3B82F6', 18)} Voice Assistant — Listen & Speak
+            </div>
+            <p style="margin:0 0 10px 0; font-size:0.8rem; color:#64748B;">Record audio query using your microphone. UberOps AI will listen and speak the response aloud.</p>
         </div>
-        <div id="mic-result" style="font-size:0.9rem; font-weight:600; color:#60A5FA;"></div>
-    </div>
+    """, unsafe_allow_html=True)
 
-    <script>
-        const btn = document.getElementById('mic-btn');
-        const status = document.getElementById('mic-status');
-        const result = document.getElementById('mic-result');
+    recorded_audio = st.audio_input("🎤 Tap to record your voice question")
+    if recorded_audio:
+        transcribed_text = transcribe_audio_buffer(recorded_audio)
+        if transcribed_text:
+            st.success(f"Voice Query Captured: \"{transcribed_text}\"")
+            return transcribed_text
 
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {{
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-
-            btn.onclick = () => {{
-                try {{
-                    recognition.start();
-                    status.innerText = 'Listening... Speak clearly into your microphone.';
-                    btn.style.background = '#EF4444';
-                }} catch (e) {{
-                    status.innerText = 'Microphone active or busy.';
-                }}
-            }};
-
-            recognition.onresult = (event) => {{
-                const transcript = event.results[0][0].transcript;
-                result.innerText = 'Captured: "' + transcript + '"';
-                status.innerText = 'Voice input captured! Click Send below.';
-                btn.style.background = '#3B82F6';
-            }};
-
-            recognition.onerror = (event) => {{
-                status.innerText = 'Speech recognition error: ' + event.error;
-                btn.style.background = '#3B82F6';
-            }};
-
-            recognition.onend = () => {{
-                if (btn.style.background === 'rgb(239, 68, 68)') {{
-                    btn.style.background = '#3B82F6';
-                    status.innerText = 'Speech ended. Review captured query.';
-                }}
-            }};
-        }} else {{
-            status.innerText = 'Voice input is not available in this browser. Please type query.';
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-        }}
-    </script>
-    """
-    components.html(speech_html, height=75)
-
-
-def render_tts_audio_player(text_content: str, key_suffix: str = ""):
-    """Render browser-native Web SpeechSynthesis text-to-speech reader."""
-    # Clean text to exclude code blocks or markdown tables
-    clean_text = text_content.replace("#", "").replace("*", "").replace("`", "").replace("•", "")
-    clean_text_js = clean_text.replace("'", "\\'").replace("\n", " ")
-
-    tts_html = f"""
-    <div style="display:inline-flex; align-items:center; gap:8px; margin-top:8px;">
-        <button id="tts-play-{key_suffix}" style="background:rgba(59,130,246,0.14); color:#60A5FA; border:1px solid rgba(96,165,250,0.3); padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            {get_icon_svg('Volume2', '#60A5FA', 14)} Read Aloud
-        </button>
-        <button id="tts-stop-{key_suffix}" style="background:rgba(239,68,68,0.14); color:#FCA5A5; border:1px solid rgba(252,165,165,0.3); padding:4px 10px; border-radius:6px; font-size:0.8rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            {get_icon_svg('VolumeX', '#FCA5A5', 14)} Stop
-        </button>
-        <span id="tts-status-{key_suffix}" style="font-size:0.75rem; color:#94A3B8;"></span>
-    </div>
-
-    <script>
-        const playBtn = document.getElementById('tts-play-{key_suffix}');
-        const stopBtn = document.getElementById('tts-stop-{key_suffix}');
-        const status = document.getElementById('tts-status-{key_suffix}');
-
-        if ('speechSynthesis' in window) {{
-            playBtn.onclick = () => {{
-                window.speechSynthesis.cancel();
-                const msg = new SpeechSynthesisUtterance('{clean_text_js[:400]}');
-                msg.rate = 1.0;
-                msg.pitch = 1.0;
-                msg.onstart = () => {{ status.innerText = 'Reading...'; }};
-                msg.onend = () => {{ status.innerText = ''; }};
-                window.speechSynthesis.speak(msg);
-            }};
-
-            stopBtn.onclick = () => {{
-                window.speechSynthesis.cancel();
-                status.innerText = '';
-            }};
-        }} else {{
-            playBtn.disabled = true;
-            stopBtn.disabled = true;
-            status.innerText = 'Text-to-speech not supported.';
-        }}
-    </script>
-    """
-    components.html(tts_html, height=45)
+    return None

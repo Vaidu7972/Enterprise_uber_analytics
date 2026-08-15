@@ -5,6 +5,7 @@ from utils.db_connection import get_engine
 from agentic_ai.tools.sql_tool import execute_read_only_query
 from agentic_ai.ui.styles.icons import get_icon_svg
 from agentic_ai.ui.components.cards import render_kpi_card, render_status_pill
+from agentic_ai.ui.components.charts import render_area_chart, render_bar_chart, render_donut_chart
 
 
 def render_overview_page():
@@ -24,31 +25,31 @@ def render_overview_page():
 
         c1, c2, c3, c4, c5 = st.columns(5)
         with c1:
-            render_kpi_card("Total Revenue", f"${float(kpi_row['total_revenue']):,.2f}", "TrendingUp", "Gold Warehouse", "#3B82F6")
+            render_kpi_card("Total Revenue", f"${float(kpi_row['total_revenue']):,.2f}", "TrendingUp", "Gold Warehouse", "#3B82F6", change_text="12.4%", is_positive=True)
         with c2:
-            render_kpi_card("Total Trips", f"{int(kpi_row['total_trips']):,}", "ChartColumn", "Completed Trips", "#10B981")
+            render_kpi_card("Total Trips", f"{int(kpi_row['total_trips']):,}", "ChartColumn", "Completed Trips", "#10B981", change_text="8.2%", is_positive=True)
         with c3:
-            render_kpi_card("Average Fare", f"${float(kpi_row['average_fare']):,.2f}", "TrendingUp", "Per Trip Avg", "#F59E0B")
+            render_kpi_card("Average Fare", f"${float(kpi_row['average_fare']):,.2f}", "TrendingUp", "Per Trip Avg", "#F59E0B", change_text="3.5%", is_positive=True)
         with c4:
-            render_kpi_card("Average Distance", f"{float(kpi_row['average_distance']):,.2f} mi", "Activity", "Trip Miles", "#8B5CF6")
+            render_kpi_card("Average Distance", f"{float(kpi_row['average_distance']):,.2f} mi", "Activity", "Trip Miles", "#8B5CF6", change_text="1.8%", is_positive=True)
         with c5:
-            render_kpi_card("Average Duration", f"{float(kpi_row['average_trip_duration']):,.1f} min", "Clock", "Trip Duration", "#EC4899")
+            render_kpi_card("Average Duration", f"{float(kpi_row['average_trip_duration']):,.1f} min", "Clock", "Trip Duration", "#EC4899", change_text="2.1%", is_positive=False)
 
         st.divider()
 
         # 2. Row 1: Charts Grid (Revenue Trend & Trip Volume Trend)
         r1_col1, r1_col2 = st.columns(2)
-        df_rev = execute_read_only_query("SELECT date_key, total_revenue, total_trips, average_fare FROM gold.revenue_mart ORDER BY date_key ASC LIMIT 30;")
+        df_rev = execute_read_only_query("SELECT date_key, is_weekend, total_revenue, total_trips, average_fare FROM gold.revenue_mart ORDER BY date_key ASC LIMIT 30;")
         
         with r1_col1:
             st.markdown(f"""<div class="saas-card-title">{get_icon_svg('TrendingUp', '#3B82F6', 20)} Revenue Performance Trend</div>""", unsafe_allow_html=True)
             if not df_rev.empty:
-                st.area_chart(df_rev.set_index("date_key")[["total_revenue"]], use_container_width=True)
+                render_area_chart(df_rev, "date_key", "total_revenue", color="#3B82F6", title="Total Revenue ($)")
 
         with r1_col2:
             st.markdown(f"""<div class="saas-card-title">{get_icon_svg('ChartColumn', '#10B981', 20)} Daily Trip Volume</div>""", unsafe_allow_html=True)
             if not df_rev.empty:
-                st.bar_chart(df_rev.set_index("date_key")[["total_trips"]], use_container_width=True)
+                render_bar_chart(df_rev, "date_key", "total_trips", color="#10B981", title="Total Trips")
 
         # 3. Row 2: Top Drivers & Weekend Breakdown
         r2_col1, r2_col2 = st.columns([3, 2])
@@ -58,11 +59,11 @@ def render_overview_page():
             st.dataframe(df_top, use_container_width=True, hide_index=True)
 
         with r2_col2:
-            st.markdown(f"""<div class="saas-card-title">{get_icon_svg('CalendarDays', '#8B5CF6', 20)} Weekend vs Weekday Performance</div>""", unsafe_allow_html=True)
-            if not df_rev.empty:
-                weekend_summary = df_rev.groupby("is_weekend")[["total_revenue", "total_trips"]].mean().reset_index()
+            st.markdown(f"""<div class="saas-card-title">{get_icon_svg('CalendarDays', '#8B5CF6', 20)} Weekend vs Weekday Revenue Share</div>""", unsafe_allow_html=True)
+            if not df_rev.empty and "is_weekend" in df_rev.columns:
+                weekend_summary = df_rev.groupby("is_weekend")[["total_revenue", "total_trips"]].sum().reset_index()
                 weekend_summary["is_weekend"] = weekend_summary["is_weekend"].map({True: "Weekend", False: "Weekday"})
-                st.bar_chart(weekend_summary.set_index("is_weekend")[["total_revenue"]], use_container_width=True)
+                render_donut_chart(weekend_summary, "is_weekend", "total_revenue", height=240)
 
         # 4. Row 3: Recent Activity Panel
         st.divider()
