@@ -24,13 +24,17 @@ def render_assistant_page():
     main_container = st.container()
 
     with main_container:
+        is_dark = st.session_state.get("theme_mode", "dark") == "dark"
+        title_color = "#F8FAFC" if is_dark else "#0F172A"
+        sub_color = "#94A3B8" if is_dark else "#64748B"
+
         # Starter Cards Grid (Empty State)
         if not st.session_state.messages:
             st.markdown(f"""
                 <div style="text-align:center; padding:2rem 0 1.5rem 0;">
                     {get_icon_svg('Bot', '#3B82F6', 42)}
-                    <h2 style="font-size:1.5rem; font-weight:800; color:#F8FAFC; margin:10px 0 4px 0;">Welcome to UberOps AI</h2>
-                    <p style="font-size:0.95rem; color:#94A3B8;">Ask questions across revenue, trips, driver performance, support SOPs, or risk predictions.</p>
+                    <h2 style="font-size:1.5rem; font-weight:800; color:{title_color}; margin:10px 0 4px 0;">Welcome to UberOps AI</h2>
+                    <p style="font-size:0.95rem; color:{sub_color};">Ask questions across revenue, trips, driver performance, support SOPs, or risk predictions.</p>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -38,39 +42,54 @@ def render_assistant_page():
             q_selected = None
 
             with sc1:
-                if st.button("Executive KPIs", key="sc_kpi", use_container_width=True):
+                if st.button("📈 Executive KPIs\nRetrieve revenue, trip counts & avg fare.", key="sc_kpi", use_container_width=True):
                     q_selected = "What are the executive KPIs in the Gold warehouse?"
-                st.markdown(render_starter_card("Executive KPIs", "Retrieve revenue, trip counts & avg fare.", "TrendingUp", "#3B82F6"), unsafe_allow_html=True)
 
-                st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
-                if st.button("Weekend Analysis", key="sc_wkd", use_container_width=True):
+                st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+                if st.button("📅 Weekend Analysis\nCompare weekday vs weekend revenue.", key="sc_wkd", use_container_width=True):
                     q_selected = "Compare weekday vs weekend performance."
-                st.markdown(render_starter_card("Weekend Analysis", "Compare weekday vs weekend revenue.", "CalendarDays", "#8B5CF6"), unsafe_allow_html=True)
 
             with sc2:
-                if st.button("Revenue Trend", key="sc_rev", use_container_width=True):
+                if st.button("📊 Revenue Trend\nDaily revenue variance & trip patterns.", key="sc_rev", use_container_width=True):
                     q_selected = "Analyse revenue trend over time."
-                st.markdown(render_starter_card("Revenue Trend", "Daily revenue variance & trip patterns.", "ChartColumn", "#10B981"), unsafe_allow_html=True)
 
-                st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
-                if st.button("Driver Analysis", key="sc_drv_an", use_container_width=True):
+                st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+                if st.button("👥 Driver Analysis\nIndividual driver rating & revenue.", key="sc_drv_an", use_container_width=True):
                     q_selected = "Show driver performance summary."
-                st.markdown(render_starter_card("Driver Analysis", "Individual driver rating & revenue.", "Users", "#EC4899"), unsafe_allow_html=True)
 
             with sc3:
-                if st.button("Top Drivers", key="sc_top", use_container_width=True):
+                if st.button("🏆 Top Drivers\nHighest revenue generating drivers.", key="sc_top", use_container_width=True):
                     q_selected = "Show top 5 drivers by revenue."
-                st.markdown(render_starter_card("Top Drivers", "Highest revenue generating drivers.", "Users", "#F59E0B"), unsafe_allow_html=True)
 
-                st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
-                if st.button("Generate Report", key="sc_rep", use_container_width=True):
+                st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
+                if st.button("📄 Generate Report\nCompile PDF, HTML & CSV reports.", key="sc_rep", use_container_width=True):
                     q_selected = "Generate Executive Performance Report"
-                st.markdown(render_starter_card("Generate Report", "Compile PDF, HTML & CSV reports.", "FileText", "#60A5FA"), unsafe_allow_html=True)
 
             st.divider()
 
         # Voice Assistant Recorder & Player Component
         voice_query = render_voice_interface()
+
+        # Multimodal Incident Upload Expander
+        with st.expander("📸 Vehicle Incident & Damage Image Analysis", expanded=False):
+            st.markdown("<p style='font-size:0.85rem; color:#64748B;'>Upload vehicle damage photo for preliminary Gemini multimodal severity assessment and SOP guidance.</p>", unsafe_allow_html=True)
+            img_file = st.file_uploader("Upload Incident Image (PNG / JPG)", type=["png", "jpg", "jpeg"], key="incident_img_uploader")
+            img_desc = st.text_input("Incident Notes / Location", placeholder="e.g. Side bumper dent near Downtown Airport corridor", key="incident_notes_input")
+            if st.button("🔍 Analyze Incident Image", key="btn_analyze_incident", type="primary"):
+                if img_file:
+                    from agentic_ai.multimodal.incident_analyzer import analyze_incident_multimodal
+                    from agentic_ai.memory.persistent_memory import create_pending_action
+                    img_bytes = img_file.read()
+                    res_inc = analyze_incident_multimodal(description=img_desc, image_bytes=img_bytes, image_mime=img_file.type or "image/jpeg")
+                    act_id = create_pending_action(
+                        action_type="CREATE_SUPPORT_TICKET",
+                        target_entity="VEHICLE_ACCIDENT_SOP",
+                        details=f"Multimodal Incident Report: {img_desc or 'Vehicle damage photo assessment'}. Preliminary assessment logged."
+                    )
+                    st.markdown(f"### 🚗 Incident Analysis Result\n{res_inc['assessment']}")
+                    st.info(f"📋 Operational support ticket action #{act_id} created as PENDING in Action Center for Manager approval.")
+                else:
+                    st.warning("Please upload an image file first.")
 
         # Render Previous Chat Messages
         for idx, msg in enumerate(st.session_state.messages):

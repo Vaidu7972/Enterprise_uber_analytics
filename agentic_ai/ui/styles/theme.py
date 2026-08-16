@@ -338,11 +338,13 @@ section[data-testid="stSidebar"] button[type="primary"] {
     font-weight: 700 !important;
 }
 
-/* Main Content Text Inputs in Light Mode */
+/* Main Content Text Inputs & Chat Input in Light Mode */
 div[data-testid="stMain"] input,
 div[data-testid="stTextInput"] input,
 div[data-baseweb="input"],
 div[data-baseweb="input"] > div,
+div[data-baseweb="textarea"],
+div[data-baseweb="textarea"] > div,
 .stTextInput > div > div {
     background-color: #FFFFFF !important;
     color: #0F172A !important;
@@ -350,24 +352,118 @@ div[data-baseweb="input"] > div,
     border-radius: 8px !important;
 }
 
-div[data-testid="stMain"] input:focus {
+/* Bottom Container & Chat Input Bar in Light Mode */
+footer,
+div[data-testid="stBottomBlockContainer"],
+div[data-testid="stBottomBlockContainer"] *,
+div[data-testid="stChatInput"],
+div[data-testid="stChatInput"] *,
+div[data-baseweb="textarea"],
+div[data-baseweb="textarea"] *,
+textarea[data-testid="stChatInputTextArea"] {
+    background-color: #FFFFFF !important;
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    border-color: #CBD5E1 !important;
+}
+
+div[data-testid="stChatInput"] {
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+
+textarea[data-testid="stChatInputTextArea"]::placeholder {
+    color: #64748B !important;
+}
+
+div[data-testid="stMain"] input:focus,
+div[data-testid="stChatInput"] input:focus,
+textarea[data-testid="stChatInputTextArea"]:focus {
     border-color: #3B82F6 !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
 }
 
-/* Main Content Action Buttons in Light Mode */
+/* Voice Recorder / Audio Input in Light Mode */
+div[data-testid="stAudioInput"],
+div[data-testid="stAudioInput"] *,
+section[data-testid="stAudioInput"],
+section[data-testid="stAudioInput"] * {
+    background-color: #FFFFFF !important;
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    border-color: #E2E8F0 !important;
+}
+
+div[data-testid="stAudioInput"] button,
+section[data-testid="stAudioInput"] button {
+    background-color: #F1F5F9 !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+}
+
+/* Chat Messages in Light Mode */
+div[data-testid="stChatMessage"] {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    padding: 12px 16px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03) !important;
+}
+
+div[data-testid="stChatMessage"] p,
+div[data-testid="stChatMessage"] span,
+div[data-testid="stChatMessage"] div {
+    color: #0F172A !important;
+}
+
+/* Secondary / Standard Main Content Buttons in Light Mode */
 div[data-testid="stMain"] button,
-div[data-testid="stMain"] .stButton > button {
-    background-color: #3B82F6 !important;
-    color: #FFFFFF !important;
-    border: 1px solid #2563EB !important;
+div[data-testid="stMain"] .stButton > button,
+div[data-testid="stMain"] button[data-testid="stBaseButton-secondary"],
+div[data-testid="stMain"] button[kind="secondary"],
+div[data-testid="stButton"] > button,
+button[data-testid="stBaseButton-secondary"] {
+    background-color: #F1F5F9 !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
     border-radius: 8px !important;
     font-weight: 600 !important;
-    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+div[data-testid="stMain"] button *,
+div[data-testid="stMain"] .stButton > button *,
+button[data-testid="stBaseButton-secondary"] * {
+    color: #0F172A !important;
 }
 
 div[data-testid="stMain"] button:hover,
-div[data-testid="stMain"] .stButton > button:hover {
+div[data-testid="stMain"] .stButton > button:hover,
+div[data-testid="stMain"] button[data-testid="stBaseButton-secondary"]:hover,
+div[data-testid="stButton"] > button:hover,
+button[data-testid="stBaseButton-secondary"]:hover {
+    background-color: #E2E8F0 !important;
+    color: #0F172A !important;
+    border-color: #94A3B8 !important;
+}
+
+/* Primary Action Buttons in Light Mode */
+div[data-testid="stMain"] button[kind="primary"],
+div[data-testid="stMain"] button[type="primary"],
+div[data-testid="stMain"] button[data-testid="stBaseButton-primary"] {
+    background-color: #3B82F6 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #2563EB !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2) !important;
+}
+
+div[data-testid="stMain"] button[kind="primary"]:hover,
+div[data-testid="stMain"] button[type="primary"]:hover,
+div[data-testid="stMain"] button[data-testid="stBaseButton-primary"]:hover {
     background-color: #2563EB !important;
     color: #FFFFFF !important;
     border-color: #1D4ED8 !important;
@@ -609,14 +705,76 @@ div[data-testid="stVegaLiteChart"] canvas,
     fill: #1E293B !important;
 }
 
+/* Code & SQL Blocks in Light Mode */
+pre, code, .stCode, div[data-testid="stCodeBlock"] {
+    background-color: #F1F5F9 !important;
+    color: #0F172A !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+}
+
+/* Dataframe & Table Headers and Cells in Light Mode */
+div[data-testid="stDataFrame"] *,
+div[data-testid="stTable"] *,
+table, th, td {
+    color: #0F172A !important;
+}
+
+div[data-testid="stDataFrame"] [role="columnheader"],
+table th {
+    background-color: #F1F5F9 !important;
+    color: #1E293B !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid #CBD5E1 !important;
+}
+
+/* Selectbox Dropdown Options in Light Mode */
+div[role="listbox"],
+ul[role="listbox"],
+div[data-baseweb="menu"],
+li[role="option"] {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+}
+
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+    background-color: #F1F5F9 !important;
+    color: #2563EB !important;
+}
+
+/* Streamlit Native Alerts in Light Mode */
+div[data-testid="stAlert"] {
+    border-radius: 10px !important;
+}
+
+div[data-testid="stAlert"] * {
+    color: inherit !important;
+}
+
+/* General Typography & Headers in Light Mode */
+div[data-testid="stMain"] p,
+div[data-testid="stMain"] span,
+div[data-testid="stMain"] label,
+div[data-testid="stMain"] h1,
+div[data-testid="stMain"] h2,
+div[data-testid="stMain"] h3,
+div[data-testid="stMain"] h4,
+div[data-testid="stMain"] h5,
+div[data-testid="stMain"] h6,
+div[data-testid="stMain"] li {
+    color: #0F172A;
+}
+
 /* Agent Response Card */
 .agent-response-card {
-    background: #F8FAFC !important;
+    background: #FFFFFF !important;
     border: 1px solid #E2E8F0 !important;
     border-radius: 14px;
     padding: 18px;
     margin-top: 12px;
     margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
 }
 
 .agent-badge {

@@ -34,3 +34,27 @@ def render_operations_page():
     if not df_trips.empty:
         st.scatter_chart(df_trips, x="trip_distance", y="fare_amount", size="trip_duration_minutes", use_container_width=True)
         st.dataframe(df_trips, use_container_width=True, hide_index=True)
+
+    st.divider()
+
+    # Multimodal Incident & Damage Analyzer Panel
+    st.markdown(f"""<div class="saas-card-title">{get_icon_svg('ShieldAlert', '#EF4444', 20)} Multimodal Vehicle Incident & Damage Analyzer</div>""", unsafe_allow_html=True)
+    
+    with st.expander("📸 Upload Incident Image & Analyze SOP Protocol", expanded=False):
+        uploaded_file = st.file_uploader("Upload Vehicle Damage Image", type=["png", "jpg", "jpeg"])
+        inc_desc = st.text_area("Incident Description", placeholder="e.g. Rear bumper collision on highway during heavy rain...")
+
+        if st.button("Run Gemini Multimodal Analysis"):
+            with st.spinner("Analyzing incident image & cross-referencing Support SOPs..."):
+                from agentic_ai.multimodal.incident_analyzer import analyze_incident_multimodal
+                
+                img_bytes = uploaded_file.read() if uploaded_file else None
+                img_mime = uploaded_file.type if uploaded_file else "image/jpeg"
+
+                result = analyze_incident_multimodal(description=inc_desc, image_bytes=img_bytes, image_mime=img_mime)
+                
+                if uploaded_file:
+                    st.image(uploaded_file, caption="Uploaded Incident Photo", width=350)
+                
+                st.markdown(result.get("assessment", ""))
+                st.caption(f"ℹ️ {result.get('disclaimer')}")

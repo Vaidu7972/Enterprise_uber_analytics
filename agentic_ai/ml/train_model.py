@@ -61,22 +61,26 @@ def train_and_persist_model():
     print(f"  F1 Score:  {f1:.4f}")
     print(f"  ROC-AUC:   {auc:.4f}")
 
-    # Persist model & feature metadata
-    joblib.dump(clf, MODEL_FILE_PATH)
+    class_dist = y.value_counts().to_dict()
+    class_dist_clean = {str(k): int(v) for k, v in class_dist.items()}
 
     meta = {
         "model_type": "RandomForestClassifier",
+        "training_period": "2024-01-01 to 2024-01-20 (Features)",
+        "validation_period": "2024-01-21 to 2024-01-31 (Target & Holdout Eval)",
         "features": FEATURE_COLUMNS,
         "target": TARGET_COLUMN,
-        "metrics": {
-            "accuracy": acc,
-            "precision": prec,
-            "recall": rec,
-            "f1_score": f1,
-            "roc_auc": auc,
-        },
+        "target_definition": "Future Period 2 underperformance (Period 2 revenue <= 35th percentile or Period 2 trips < 1)",
         "sample_count": len(df),
-        "importances": dict(zip(FEATURE_COLUMNS, clf.feature_importances_.tolist())),
+        "class_distribution": class_dist_clean,
+        "metrics": {
+            "accuracy": round(acc, 4),
+            "precision": round(prec, 4),
+            "recall": round(rec, 4),
+            "f1_score": round(f1, 4),
+            "roc_auc": round(auc, 4),
+        },
+        "importances": {col: round(float(imp), 4) for col, imp in zip(FEATURE_COLUMNS, clf.feature_importances_)},
     }
 
     with open(MODEL_META_PATH, "w", encoding="utf-8") as f:

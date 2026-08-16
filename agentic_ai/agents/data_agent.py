@@ -14,6 +14,10 @@ from agentic_ai.tools.sql_tool import (
 )
 
 
+import re
+from agentic_ai.memory.conversation_memory import resolve_entity_in_question, update_session_memory
+
+
 def generate_sql_plan(
     question: str,
     error_context: str = None,
@@ -21,41 +25,74 @@ def generate_sql_plan(
 ) -> SQLPlan:
     """
     Generate read-only SQL plan for PostgreSQL Gold warehouse query.
-    Evaluates instant pattern matching first for sub-millisecond execution.
+    Evaluates entity-aware pattern extraction first (driver_id, customer_id, location, comparison).
     """
     q_lower = question.lower()
 
-    # Instant Zero-Delay Pattern Matching (0.1ms)
     if not error_context:
-        if any(kw in q_lower for kw in ["driver", "drivers", "top", "rank", "leaderboard"]):
+        # 1. Entity Extraction: Specific Driver ID (e.g. D101, D052)
+        driver_match = re.search(r'\b(d\d{2,5})\b', question, re.IGNORECASE)
+        if driver_match:
+            driver_id = driver_match.group(1).upper()
             return SQLPlan(
                 can_answer=True,
-                sql="SELECT driver_name, driver_city, driver_rating, total_revenue, total_trips FROM gold.driver_performance_mart ORDER BY total_revenue DESC LIMIT 5;",
+                sql=f"SELECT driver_id, driver_name, driver_city, driver_rating, total_revenue, total_trips FROM gold.driver_performance_mart WHERE UPPER(driver_id) = '{driver_id}';",
                 tables_used=["gold.driver_performance_mart"],
-                explanation="Querying top drivers by revenue from driver performance mart."
+                explanation=f"Targeted query for driver ID {driver_id} from driver performance mart."
             )
-        elif any(kw in q_lower for kw in ["trend", "daily", "over time"]):
+
+        # 2. Entity Extraction: Specific Customer ID (e.g. C101)
+        customer_match = re.search(r'\b(c\d{2,5})\b', question, re.IGNORECASE)
+        if customer_match:
+            cust_id = customer_match.group(1).upper()
             return SQLPlan(
                 can_answer=True,
-                sql="SELECT date_key, total_revenue, total_trips FROM gold.revenue_mart ORDER BY date_key ASC LIMIT 30;",
-                tables_used=["gold.revenue_mart"],
-                explanation="Querying daily revenue trend from revenue mart."
+                sql=f"SELECT customer_id, customer_name, city, gender FROM gold.dim_customer WHERE UPPER(customer_id) = '{cust_id}';",
+                tables_used=["gold.dim_customer"],
+                explanation=f"Targeted query for customer ID {cust_id} from customer dimension."
             )
-        elif any(kw in q_lower for kw in ["weekend", "weekday"]):
+
+        # 3. Entity Extraction: Location / City Filters (e.g. Pune, Mumbai, Delhi)
+        known_cities = ["pune", "mumbai", "delhi", "bangalore", "hyderabad", "chennai", "kolkata", "ahmedabad", "jaipur"]
+        matched_city = next((city for city in known_cities if city in q_lower), None)
+        if matched_city:
+            city_caps = matched_city.upper()
+            return SQLPlan(
+                can_answer=True,
+                sql=f"SELECT driver_id, driver_name, driver_city, driver_rating, total_revenue, total_trips FROM gold.driver_performance_mart WHERE UPPER(driver_city) LIKE '%{city_caps}%' ORDER BY total_revenue DESC LIMIT 10;",
+                tables_used=["gold.driver_performance_mart"],
+                explanation=f"Querying drivers located in {matched_city.title()} from driver performance mart."
+            )
+
+        # 4. Intent: Weekend vs Weekday Analytics
+        if any(kw in q_lower for kw in ["weekend", "weekday", "compare"]):
             return SQLPlan(
                 can_answer=True,
                 sql="SELECT date_key, is_weekend, total_revenue, total_trips FROM gold.revenue_mart ORDER BY date_key DESC LIMIT 30;",
                 tables_used=["gold.revenue_mart"],
                 explanation="Querying weekend vs weekday revenue metrics."
             )
-        elif any(kw in q_lower for kw in ["customer", "customers"]):
+
+        # 5. Intent: Broad Top Drivers Leaderboard
+        if any(kw in q_lower for kw in ["top", "rank", "leaderboard", "best"]):
             return SQLPlan(
                 can_answer=True,
-                sql="SELECT customer_id, customer_name, city, gender FROM gold.dim_customer LIMIT 10;",
-                tables_used=["gold.dim_customer"],
-                explanation="Querying customer dimension data."
+                sql="SELECT driver_name, driver_city, driver_rating, total_revenue, total_trips FROM gold.driver_performance_mart ORDER BY total_revenue DESC LIMIT 5;",
+                tables_used=["gold.driver_performance_mart"],
+                explanation="Querying top drivers by revenue from driver performance mart."
             )
-        elif any(kw in q_lower for kw in ["revenue", "total", "kpi", "executive", "fare", "trip", "trips"]):
+
+        # 6. Intent: Trend / Daily Revenue
+        if any(kw in q_lower for kw in ["trend", "daily", "over time"]):
+            return SQLPlan(
+                can_answer=True,
+                sql="SELECT date_key, total_revenue, total_trips FROM gold.revenue_mart ORDER BY date_key ASC LIMIT 30;",
+                tables_used=["gold.revenue_mart"],
+                explanation="Querying daily revenue trend from revenue mart."
+            )
+
+        # 7. Intent: Executive Warehouse KPIs
+        if any(kw in q_lower for kw in ["revenue", "total", "kpi", "executive", "fare", "trip", "trips"]):
             return SQLPlan(
                 can_answer=True,
                 sql="SELECT * FROM gold.kpi_summary;",
@@ -138,8 +175,10 @@ def explain_query_result(
 
 def answer_data_question(
     question: str,
-    max_retries: int = 1
+    max_retries: int = 1,
+    session_id: str = "default_session"
 ):
+    question = resolve_entity_in_question(question, session_id=session_id)
     error_context = None
     previous_sql = None
 
@@ -173,16 +212,17 @@ def answer_data_question(
                 return {
                     "answer": "The query executed successfully, but no matching records were found in the Gold warehouse.",
                     "sql": plan.sql,
-                    "data": dataframe,
+                    "data": [],
                     "tables_used": plan.tables_used,
                 }
 
             answer = explain_query_result(question, plan.sql, dataframe)
+            records = dataframe.to_dict(orient="records")
 
             return {
                 "answer": answer,
                 "sql": plan.sql,
-                "data": dataframe,
+                "data": records,
                 "tables_used": plan.tables_used,
             }
 

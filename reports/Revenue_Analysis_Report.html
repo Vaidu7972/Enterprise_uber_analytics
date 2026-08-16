@@ -4,117 +4,130 @@
     <head>
         <title>Revenue Analysis Report — UberOps AI</title>
         <style>
-            body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; background: #0B1120; color: #F8FAFC; }
-            h1 { color: #A78BFA; border-bottom: 2px solid #7C3AED; padding-bottom: 10px; }
-            .metric-box { display: inline-block; background: #1E293B; border-radius: 8px; padding: 15px; margin: 10px; min-width: 150px; text-align: center; }
-            .metric-box h2 { margin: 5px 0; color: #60A5FA; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
-            th { background-color: #1E293B; color: #C084FC; }
+            body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 40px; background: #F8FAFC; color: #0F172A; }
+            h1 { color: #1E293B; border-bottom: 3px solid #3B82F6; padding-bottom: 10px; }
+            .metric-box { display: inline-block; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 10px; padding: 16px; margin: 10px 10px 10px 0; min-width: 160px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+            .metric-box h2 { margin: 6px 0 0 0; color: #2563EB; font-size: 1.5rem; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #FFFFFF; border-radius: 8px; overflow: hidden; }
+            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #E2E8F0; }
+            th { background-color: #F1F5F9; color: #1E293B; font-weight: 700; }
+            .rec-box { background: #EFF6FF; border-left: 4px solid #3B82F6; padding: 14px; margin: 16px 0; border-radius: 4px; }
         </style>
     </head>
     <body>
         <h1>🚕 UberOps AI — Revenue Analysis Report</h1>
-        <p><i>Generated on 2026-08-15 11:01:51</i></p>
+        <p><i>Generated on 2026-08-16 14:38:30 | Enterprise Mobility Analytics</i></p>
         <hr/>
         <h3>Executive Summary</h3>
-        <p>This executive report details performance metrics for UberOps Enterprise Analytics. Total revenue generated is $323,762.34 across 14,766 trips, with an average trip fare of $21.93 and average distance of 4.57 miles.</p>
-        <div class="metric-box"><p>TOTAL REVENUE</p><h2>$323,762.34</h2></div>
-        <div class="metric-box"><p>TOTAL TRIPS</p><h2>14,766</h2></div>
-        <div class="metric-box"><p>AVG FARE</p><h2>$21.93</h2></div>
+        <p>This Revenue Analysis Report evaluates daily revenue trends, weekend vs weekday trip performance, and fare behavior. Total warehouse revenue is $323,762.34 across 14,766 trips.</p>
+        <div class="metric-box"><p style="margin:0; font-size:0.8rem; color:#64748B;">TOTAL REVENUE</p><h2>$323,762.34</h2></div>
+        <div class="metric-box"><p style="margin:0; font-size:0.8rem; color:#64748B;">TOTAL TRIPS</p><h2>14,766</h2></div>
+        <div class="metric-box"><p style="margin:0; font-size:0.8rem; color:#64748B;">AVG FARE</p><h2>$21.93</h2></div>
         
-        <h3>Top Drivers Leaderboard</h3>
+        <div class="rec-box">
+            <strong>🎯 Recommended Action:</strong> Optimize weekend surge pricing tariffs to capture peak demand in high-volume cities.
+        </div>
+
+        <h3>Detailed Analytical Breakdown</h3>
         <table border="1" class="dataframe table">
   <thead>
     <tr style="text-align: right;">
-      <th>driver_id</th>
-      <th>driver_name</th>
-      <th>driver_city</th>
-      <th>driver_rating</th>
-      <th>total_revenue</th>
+      <th>date_key</th>
       <th>total_trips</th>
+      <th>total_revenue</th>
+      <th>average_fare</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>D4407</td>
-      <td>Richard Brown</td>
-      <td>Roymouth</td>
-      <td>4.70</td>
-      <td>361.8</td>
-      <td>3</td>
+      <td>2024-01-31</td>
+      <td>476</td>
+      <td>10166.29</td>
+      <td>21.36</td>
     </tr>
     <tr>
-      <td>D90</td>
-      <td>Jason Leonard</td>
-      <td>Blankenshipbury</td>
-      <td>4.61</td>
-      <td>325.6</td>
-      <td>4</td>
+      <td>2024-01-30</td>
+      <td>479</td>
+      <td>11987.33</td>
+      <td>25.03</td>
     </tr>
     <tr>
-      <td>D793</td>
-      <td>Amy Miranda</td>
-      <td>North Carl</td>
-      <td>3.72</td>
-      <td>306.0</td>
-      <td>3</td>
+      <td>2024-01-29</td>
+      <td>472</td>
+      <td>13455.68</td>
+      <td>28.51</td>
     </tr>
     <tr>
-      <td>D506</td>
-      <td>Emily Lopez</td>
-      <td>Goldenstad</td>
-      <td>3.90</td>
-      <td>293.9</td>
-      <td>3</td>
+      <td>2024-01-28</td>
+      <td>475</td>
+      <td>8224.75</td>
+      <td>17.32</td>
     </tr>
     <tr>
-      <td>D541</td>
-      <td>Scott Smith</td>
-      <td>Lake Heidiport</td>
-      <td>4.90</td>
-      <td>257.5</td>
-      <td>3</td>
+      <td>2024-01-27</td>
+      <td>483</td>
+      <td>8678.34</td>
+      <td>17.97</td>
     </tr>
     <tr>
-      <td>D4594</td>
-      <td>David Petersen</td>
-      <td>Harrisberg</td>
-      <td>3.94</td>
-      <td>254.7</td>
-      <td>3</td>
+      <td>2024-01-26</td>
+      <td>478</td>
+      <td>8997.62</td>
+      <td>18.82</td>
     </tr>
     <tr>
-      <td>D886</td>
-      <td>Chris Mason</td>
-      <td>East Chasemouth</td>
-      <td>4.75</td>
-      <td>251.0</td>
-      <td>3</td>
+      <td>2024-01-25</td>
+      <td>485</td>
+      <td>9129.07</td>
+      <td>18.82</td>
     </tr>
     <tr>
-      <td>D320</td>
-      <td>Amanda Thomas</td>
-      <td>Glennland</td>
-      <td>4.01</td>
-      <td>236.0</td>
-      <td>4</td>
+      <td>2024-01-24</td>
+      <td>490</td>
+      <td>9971.47</td>
+      <td>20.35</td>
     </tr>
     <tr>
-      <td>D3680</td>
-      <td>Sara Burke</td>
-      <td>Lisaburgh</td>
-      <td>3.94</td>
-      <td>234.4</td>
-      <td>3</td>
+      <td>2024-01-23</td>
+      <td>478</td>
+      <td>9919.00</td>
+      <td>20.75</td>
     </tr>
     <tr>
-      <td>D4433</td>
-      <td>Rebecca Crawford</td>
-      <td>Michaeltown</td>
-      <td>4.38</td>
-      <td>225.0</td>
-      <td>3</td>
+      <td>2024-01-22</td>
+      <td>467</td>
+      <td>13512.65</td>
+      <td>28.94</td>
+    </tr>
+    <tr>
+      <td>2024-01-21</td>
+      <td>460</td>
+      <td>8119.34</td>
+      <td>17.65</td>
+    </tr>
+    <tr>
+      <td>2024-01-20</td>
+      <td>476</td>
+      <td>8571.22</td>
+      <td>18.01</td>
+    </tr>
+    <tr>
+      <td>2024-01-19</td>
+      <td>482</td>
+      <td>8877.31</td>
+      <td>18.42</td>
+    </tr>
+    <tr>
+      <td>2024-01-18</td>
+      <td>479</td>
+      <td>11600.15</td>
+      <td>24.22</td>
+    </tr>
+    <tr>
+      <td>2024-01-17</td>
+      <td>489</td>
+      <td>13808.23</td>
+      <td>28.24</td>
     </tr>
   </tbody>
 </table>

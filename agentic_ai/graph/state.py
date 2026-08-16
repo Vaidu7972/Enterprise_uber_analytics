@@ -14,7 +14,9 @@ class AgentState(TypedDict, total=False):
     recommendations: Optional[Dict[str, Any]]
     
     approval_required: bool
-    approval_status: str  # "pending", "approved", "rejected"
+    approval_status: str  # "pending", "approved", "rejected", "not_required"
+    action_type: Optional[str]
+    target_entity: Optional[str]
     
     final_answer: str
     errors: List[str]

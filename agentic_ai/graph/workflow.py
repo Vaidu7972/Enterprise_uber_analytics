@@ -1,5 +1,6 @@
 import time
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
 from agentic_ai.graph.state import AgentState
 from agentic_ai.graph.nodes import (
     supervisor_node,
@@ -7,7 +8,8 @@ from agentic_ai.graph.nodes import (
     data_agent_node,
     support_agent_node,
     ml_agent_node,
-    multi_agent_node
+    multi_agent_node,
+    evidence_judge_node,
 )
 
 
@@ -24,6 +26,7 @@ builder.add_node("data_agent", data_agent_node)
 builder.add_node("support_agent", support_agent_node)
 builder.add_node("ml_agent", ml_agent_node)
 builder.add_node("multi_agent", multi_agent_node)
+builder.add_node("evidence_judge", evidence_judge_node)
 
 builder.set_entry_point("supervisor")
 
@@ -40,18 +43,20 @@ builder.add_conditional_edges(
 )
 
 builder.add_edge("general", END)
-builder.add_edge("data_agent", END)
-builder.add_edge("support_agent", END)
-builder.add_edge("ml_agent", END)
-builder.add_edge("multi_agent", END)
+builder.add_edge("data_agent", "evidence_judge")
+builder.add_edge("support_agent", "evidence_judge")
+builder.add_edge("ml_agent", "evidence_judge")
+builder.add_edge("multi_agent", "evidence_judge")
+builder.add_edge("evidence_judge", END)
 
-# Compile graph
-langgraph_app = builder.compile()
+# Compile graph with persistent in-memory checkpointer
+memory_checkpointer = MemorySaver()
+langgraph_app = builder.compile(checkpointer=memory_checkpointer)
 
 
-def run_orchestration(question: str) -> dict:
+def run_orchestration(question: str, session_id: str = "default_session") -> dict:
     """
-    Run full LangGraph multi-agent workflow with trace steps & timing metrics.
+    Run full LangGraph multi-agent workflow with trace steps, evidence reflection, & checkpointing.
     """
     start_time = time.time()
     initial_state = {
@@ -59,7 +64,8 @@ def run_orchestration(question: str) -> dict:
         "errors": []
     }
 
-    final_state = langgraph_app.invoke(initial_state)
+    config = {"configurable": {"thread_id": session_id}}
+    final_state = langgraph_app.invoke(initial_state, config=config)
     elapsed_ms = round((time.time() - start_time) * 1000, 2)
 
     route = final_state.get("route", "general")

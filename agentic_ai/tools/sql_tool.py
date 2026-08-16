@@ -160,18 +160,25 @@ def execute_read_only_query(
     max_rows: int = 200
 ) -> pd.DataFrame:
     """
-    Validate and execute a read-only SQL query.
+    Validate and execute a read-only SQL query with statement timeout and row limits.
     """
+    safe_query = validate_read_only_sql(query)
 
-    safe_query = validate_read_only_sql(
-        query
-    )
+    # Enforce default LIMIT 200 if no LIMIT is specified in the query
+    if "limit" not in safe_query.lower():
+        safe_query = f"{safe_query} LIMIT {max_rows}"
 
-    with engine.connect() as connection:
-
-        df = pd.read_sql_query(
-            text(safe_query),
-            connection
-        )
-
-    return df.head(max_rows)
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SET LOCAL statement_timeout = '5000ms';"))
+            df = pd.read_sql_query(
+                text(safe_query),
+                connection
+            )
+        return df.head(max_rows)
+    except Exception as err:
+        error_msg = str(err)
+        # Sanitize sensitive database credentials/connection strings if present
+        if "Password" in error_msg or "password" in error_msg:
+            raise RuntimeError("Database execution error: Connection failure.")
+        raise RuntimeError(f"Database query error: {error_msg}")

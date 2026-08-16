@@ -5,7 +5,7 @@ from utils.db_connection import get_engine
 
 def init_audit_tables():
     """
-    Initialize audit and investigation history tables in PostgreSQL Gold schema.
+    Initialize audit, action, and investigation history tables in PostgreSQL Gold schema.
     """
     engine = get_engine()
     with engine.connect() as conn:
@@ -30,8 +30,13 @@ def init_audit_tables():
                 target_entity VARCHAR(100),
                 details TEXT,
                 status VARCHAR(50),
-                approved_by VARCHAR(100)
+                approved_by VARCHAR(100),
+                rejection_reason TEXT,
+                executed_at TIMESTAMP
             );
+
+            ALTER TABLE gold.action_logs ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+            ALTER TABLE gold.action_logs ADD COLUMN IF NOT EXISTS executed_at TIMESTAMP;
 
             CREATE TABLE IF NOT EXISTS gold.investigation_logs (
                 investigation_id SERIAL PRIMARY KEY,
@@ -45,6 +50,107 @@ def init_audit_tables():
             );
         """))
         conn.commit()
+
+
+def create_pending_action(action_type: str, target_entity: str, details: str) -> int:
+    """
+    Register a sensitive agent recommendation as PENDING manager approval.
+    Does NOT execute the underlying tool.
+    """
+    init_audit_tables()
+    engine = get_engine()
+    with engine.connect() as conn:
+        res = conn.execute(text("""
+            INSERT INTO gold.action_logs (action_type, target_entity, details, status)
+            VALUES (:action_type, :target_entity, :details, 'PENDING')
+            RETURNING action_id;
+        """), {
+            "action_type": action_type,
+            "target_entity": target_entity,
+            "details": details
+        })
+        action_id = res.scalar()
+        conn.commit()
+        return action_id
+
+
+def get_pending_actions() -> list[dict]:
+    """
+    Fetch all operational actions currently awaiting Human-in-the-Loop manager approval.
+    """
+    try:
+        init_audit_tables()
+        engine = get_engine()
+        with engine.connect() as conn:
+            res = conn.execute(text("""
+                SELECT action_id, timestamp, action_type, target_entity, details, status
+                FROM gold.action_logs
+                WHERE status = 'PENDING'
+                ORDER BY timestamp DESC;
+            """)).mappings().all()
+            return [dict(r) for r in res]
+    except Exception:
+        return []
+
+
+def get_all_action_logs(limit: int = 50) -> list[dict]:
+    """
+    Fetch complete audit trail of actions (PENDING, APPROVED, REJECTED).
+    """
+    try:
+        init_audit_tables()
+        engine = get_engine()
+        with engine.connect() as conn:
+            res = conn.execute(text("""
+                SELECT action_id, timestamp, action_type, target_entity, details, status, approved_by, rejection_reason, executed_at
+                FROM gold.action_logs
+                ORDER BY timestamp DESC
+                LIMIT :limit;
+            """), {"limit": limit}).mappings().all()
+            return [dict(r) for r in res]
+    except Exception:
+        return []
+
+
+def approve_pending_action(action_id: int, approved_by: str = "Manager") -> dict:
+    """
+    Approve pending action in PostgreSQL and mark it as APPROVED.
+    """
+    init_audit_tables()
+    engine = get_engine()
+    with engine.connect() as conn:
+        conn.execute(text("""
+            UPDATE gold.action_logs
+            SET status = 'APPROVED', approved_by = :approved_by, executed_at = CURRENT_TIMESTAMP
+            WHERE action_id = :action_id;
+        """), {
+            "action_id": action_id,
+            "approved_by": approved_by
+        })
+        conn.commit()
+    log_agent_activity("Manager approved action", "action_center", "Human Manager", status="success", approval_status="APPROVED")
+    return {"success": True, "action_id": action_id, "status": "APPROVED", "approved_by": approved_by}
+
+
+def reject_pending_action(action_id: int, rejection_reason: str = "Manager rejected", rejected_by: str = "Manager") -> dict:
+    """
+    Reject pending action in PostgreSQL and log rejection reason without executing action tool.
+    """
+    init_audit_tables()
+    engine = get_engine()
+    with engine.connect() as conn:
+        conn.execute(text("""
+            UPDATE gold.action_logs
+            SET status = 'REJECTED', approved_by = :rejected_by, rejection_reason = :rejection_reason, executed_at = CURRENT_TIMESTAMP
+            WHERE action_id = :action_id;
+        """), {
+            "action_id": action_id,
+            "rejected_by": rejected_by,
+            "rejection_reason": rejection_reason
+        })
+        conn.commit()
+    log_agent_activity("Manager rejected action", "action_center", "Human Manager", status="rejected", approval_status="REJECTED")
+    return {"success": True, "action_id": action_id, "status": "REJECTED", "rejection_reason": rejection_reason}
 
 
 def log_agent_activity(question: str, route: str, agent: str, tool_used: str = None, status: str = "success", action_recommended: str = None, approval_status: str = "N/A", session_id: str = "session_default"):

@@ -1,5 +1,7 @@
 {
   "model_type": "RandomForestClassifier",
+  "training_period": "2024-01-01 to 2024-01-20 (Features)",
+  "validation_period": "2024-01-21 to 2024-01-31 (Target & Holdout Eval)",
   "features": [
     "rating",
     "total_trips",
@@ -9,20 +11,25 @@
     "average_duration"
   ],
   "target": "underperformance_risk",
-  "metrics": {
-    "accuracy": 1.0,
-    "precision": 1.0,
-    "recall": 1.0,
-    "f1_score": 1.0,
-    "roc_auc": 1.0
-  },
+  "target_definition": "Future Period 2 underperformance (Period 2 revenue <= 35th percentile or Period 2 trips < 1)",
   "sample_count": 5001,
+  "class_distribution": {
+    "0": 3161,
+    "1": 1840
+  },
+  "metrics": {
+    "accuracy": 0.6315,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1_score": 0.0,
+    "roc_auc": 0.5123
+  },
   "importances": {
-    "rating": 0.9513184925732185,
-    "total_trips": 0.0014890175625776015,
-    "total_revenue": 0.009387277155787336,
-    "average_fare": 0.009239738990307785,
-    "average_distance": 0.017500323873117948,
-    "average_duration": 0.011065149844990662
+    "rating": 0.2018,
+    "total_trips": 0.0166,
+    "total_revenue": 0.1655,
+    "average_fare": 0.1675,
+    "average_distance": 0.2134,
+    "average_duration": 0.2353
   }
 }

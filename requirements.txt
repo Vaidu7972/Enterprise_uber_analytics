@@ -13,3 +13,6 @@ langgraph
 streamlit
 matplotlib
 reportlab
+SpeechRecognition
+gTTS
+altair
