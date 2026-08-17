@@ -1,7 +1,6 @@
 import streamlit as st
 from agentic_ai.ui.styles.icons import get_icon_svg
 
-
 def render_kpi_card(
     title: str,
     value: str,
@@ -14,21 +13,27 @@ def render_kpi_card(
     """Render high-end SaaS KPI metric card matching modern UI reference standards."""
     is_dark = st.session_state.get("theme_mode", "dark") == "dark"
 
-    # Derive translucent background & border for icon badge
     badge_bg = f"{icon_color}1F"  # 12% opacity
     badge_border = f"{icon_color}40"  # 25% opacity
 
     trend_html = ""
     if change_text:
-        trend_color = "#10B981" if is_positive else "#EF4444"
-        trend_arrow = "↑" if is_positive else "↓"
-        trend_html = (
-            f'<span style="font-size:0.75rem; font-weight:700; color:{trend_color}; '
-            f'background:{trend_color}18; padding:2px 8px; border-radius:999px; '
-            f'border:1px solid {trend_color}30;">{trend_arrow} {change_text}</span>'
-        )
+        if "comparison" in change_text.lower() or "baseline" in change_text.lower() or "n/a" in change_text.lower():
+            trend_html = (
+                f'<span style="font-size:0.72rem; font-weight:600; color:#94A3B8; '
+                f'background:rgba(148,163,184,0.12); padding:2px 8px; border-radius:999px; '
+                f'border:1px solid rgba(148,163,184,0.2);">{change_text}</span>'
+            )
+        else:
+            trend_color = "#10B981" if is_positive else "#EF4444"
+            trend_arrow = "↑" if is_positive else "↓"
+            clean_text = change_text.lstrip("↑↓+- ").strip()
+            trend_html = (
+                f'<span style="font-size:0.75rem; font-weight:700; color:{trend_color}; '
+                f'background:{trend_color}18; padding:2px 8px; border-radius:999px; '
+                f'border:1px solid {trend_color}30;">{trend_arrow} {clean_text}</span>'
+            )
 
-    # Use clean non-indented HTML string to avoid markdown block-code conversion
     card_html = (
         f'<div class="kpi-card">'
         f'<div class="kpi-header" style="display:flex; align-items:center; justify-content:space-between;">'
@@ -47,7 +52,7 @@ def render_kpi_card(
     st.markdown(card_html, unsafe_allow_html=True)
 
 
-def render_starter_card(title: str, description: str, icon_name: str, icon_color: str = "#60A5FA"):
+def render_starter_card(title: str, description: str, icon_name: str, icon_color: str = "#3B82F6"):
     """Render AI starter question card."""
     is_dark = st.session_state.get("theme_mode", "dark") == "dark"
     title_color = "#F8FAFC" if is_dark else "#0F172A"
@@ -71,11 +76,11 @@ def render_status_pill(status: str) -> str:
     status_str = str(status) if status is not None else "Unknown"
     status_lower = status_str.lower()
 
-    if status_lower in ("completed", "success", "ready", "online", "active"):
+    if status_lower in ("completed", "success", "ready", "online", "active", "approved", "low risk", "low"):
         return f'<span class="status-pill status-pill-green">{get_icon_svg("CircleCheck", "#10B981", 14)} {status_str}</span>'
-    elif status_lower in ("running", "processing", "in progress"):
+    elif status_lower in ("running", "processing", "in progress", "pending"):
         return f'<span class="status-pill status-pill-blue">{get_icon_svg("RotateCw", "#3B82F6", 14)} {status_str}</span>'
-    elif status_lower in ("failed", "error", "offline", "high risk"):
-        return f'<span class="status-pill" style="background:rgba(239,68,68,0.12); color:#EF4444; border-color:rgba(239,68,68,0.25);">{get_icon_svg("CircleX", "#EF4444", 14)} {status_str}</span>'
+    elif status_lower in ("failed", "error", "offline", "high risk", "high", "rejected", "critical"):
+        return f'<span class="status-pill status-pill-red">{get_icon_svg("CircleX", "#EF4444", 14)} {status_str}</span>'
     else:
-        return f'<span class="status-pill" style="background:rgba(245,158,11,0.12); color:#F59E0B; border-color:rgba(245,158,11,0.25);">{get_icon_svg("Clock", "#F59E0B", 14)} {status_str}</span>'
+        return f'<span class="status-pill status-pill-amber">{get_icon_svg("Clock", "#F59E0B", 14)} {status_str}</span>'

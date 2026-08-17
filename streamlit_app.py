@@ -11,6 +11,7 @@ from agentic_ai.ui.pages.drivers import render_drivers_page
 from agentic_ai.ui.pages.operations import render_operations_page
 from agentic_ai.ui.pages.knowledge import render_knowledge_page
 from agentic_ai.ui.pages.predictions import render_predictions_page
+from agentic_ai.ui.pages.prediction_studio import render_prediction_studio_page
 from agentic_ai.ui.pages.action_center import render_action_center_page
 from agentic_ai.ui.pages.pipeline import render_pipeline_page
 from agentic_ai.ui.pages.quality import render_quality_page
@@ -51,6 +52,8 @@ elif selected_page == "Knowledge Center":
     render_knowledge_page()
 elif selected_page == "Predictive Intelligence":
     render_predictions_page()
+elif selected_page == "Prediction Studio":
+    render_prediction_studio_page()
 elif selected_page == "Action Center":
     render_action_center_page()
 elif selected_page == "Pipeline Health":

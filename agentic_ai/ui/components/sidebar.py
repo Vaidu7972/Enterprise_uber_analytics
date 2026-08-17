@@ -1,7 +1,6 @@
 import streamlit as st
 from agentic_ai.ui.styles.icons import get_icon_svg
 
-
 NAV_STRUCTURE = [
     ("COMMAND CENTER", [
         ("Overview", "LayoutDashboard"),
@@ -15,6 +14,7 @@ NAV_STRUCTURE = [
     ("AI INTELLIGENCE", [
         ("Knowledge Center", "BookOpen"),
         ("Predictive Intelligence", "BrainCircuit"),
+        ("Prediction Studio", "Sparkles"),
         ("Action Center", "ListChecks"),
     ]),
     ("DATA PLATFORM", [
@@ -32,7 +32,6 @@ NAV_STRUCTURE = [
     ]),
 ]
 
-
 def render_saas_sidebar() -> str:
     """Render grouped SaaS navigation sidebar and return selected page name."""
     with st.sidebar:
@@ -44,7 +43,7 @@ def render_saas_sidebar() -> str:
         sub_color = "#94A3B8" if is_dark else "#64748B"
         group_color = "#64748B" if is_dark else "#475569"
 
-        # Branding Top with Theme Toggle
+        # Branding Top Header with Theme Toggle
         c_brand, c_toggle = st.columns([7, 4])
         with c_brand:
             brand_html = (
@@ -63,7 +62,7 @@ def render_saas_sidebar() -> str:
                 st.session_state.theme_mode = "light" if is_dark else "dark"
                 st.rerun()
 
-        st.markdown("<div style='border-bottom:1px solid rgba(148,163,184,0.14); margin: 8px 0 12px 0;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='border-bottom:1px solid rgba(148,163,184,0.14); margin: 8px 0 10px 0;'></div>", unsafe_allow_html=True)
 
         if "current_page" not in st.session_state:
             st.session_state.current_page = "Overview"
@@ -71,7 +70,7 @@ def render_saas_sidebar() -> str:
         selected_page = st.session_state.current_page
 
         for group_label, items in NAV_STRUCTURE:
-            st.markdown(f'<div style="font-size:0.7rem; font-weight:700; color:{group_color}; letter-spacing:1px; margin:14px 0 6px 4px; text-transform:uppercase;">{group_label}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size:0.68rem; font-weight:700; color:{group_color}; letter-spacing:1px; margin:12px 0 4px 4px; text-transform:uppercase;">{group_label}</div>', unsafe_allow_html=True)
             for page_name, icon_name in items:
                 is_selected = (selected_page == page_name)
                 icon_color = "#3B82F6" if is_selected else ("#94A3B8" if is_dark else "#64748B")
@@ -79,7 +78,7 @@ def render_saas_sidebar() -> str:
                 
                 col1, col2 = st.columns([1, 6])
                 with col1:
-                    st.markdown(f'<div style="padding-top:6px;">{get_icon_svg(icon_name, icon_color, 18)}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="padding-top:6px;">{get_icon_svg(icon_name, icon_color, 17)}</div>', unsafe_allow_html=True)
                 with col2:
                     if st.button(page_name, key=f"nav_{page_name}", use_container_width=True, type=button_style):
                         st.session_state.current_page = page_name

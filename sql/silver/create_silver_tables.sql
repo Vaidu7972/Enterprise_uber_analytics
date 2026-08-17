@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS silver.trip_rejected
     rejected_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
 -- Driver Clean
 CREATE TABLE IF NOT EXISTS silver.driver_clean
 (
