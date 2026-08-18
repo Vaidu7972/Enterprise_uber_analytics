@@ -1,7 +1,7 @@
 import json
-from google.genai import types
-from agentic_ai.config.agent_config import GEMINI_MODEL
-from agentic_ai.llm.gemini_client import safe_generate_content
+from google.genai import types     #configure gemini 
+from agentic_ai.config.agent_config import GEMINI_MODEL    # no need to mention model gemini again and again
+from agentic_ai.llm.gemini_client import safe_generate_content    #gemini wrapper (abstraction)
 from agentic_ai.tools.ml_tool import predict_driver_risk
 
 ML_AGENT_PROMPT = """
@@ -25,23 +25,23 @@ def answer_ml_question(question: str, driver_id: str = None) -> dict:
     """
     if not driver_id:
         words = question.replace("?", "").replace(",", "").split()
-        for w in words:
-            if w.upper().startswith("D") and len(w) >= 3 and w[1:].isdigit():
+        for w in words:    #check every word
+            if w.upper().startswith("D") and len(w) >= 3 and w[1:].isdigit():    #3condition for driver id
                 driver_id = w.upper()
                 break
 
-    ml_result = predict_driver_risk(driver_id=driver_id)
+    ml_result = predict_driver_risk(driver_id=driver_id)     
 
     prompt = f"""
 USER QUESTION:
 {question}
 
 ML PREDICTION RESULT:
-{json.dumps(ml_result, indent=2, default=str)}
+{json.dumps(ml_result, indent=2, default=str)}    # ml tool returns a Python dictionary
 
 Provide a concise, professional business breakdown explaining the ML risk predictions, the driver rating/trip factors driving the score, and key operational takeaways.
 """
-
+#calling Gemini
     response = safe_generate_content(
         model=GEMINI_MODEL,
         contents=prompt,
@@ -65,3 +65,4 @@ Provide a concise, professional business breakdown explaining the ML risk predic
         "features_used": ml_result.get("features_used", {})
     }
 
+# ml_agent.py --> Ml tool -->random Forest Prediction (risk probablity + feature)

@@ -1,4 +1,4 @@
-from google.genai import types
+from google.genai import types    #config file 
 
 from agentic_ai.config.agent_config import (
     GEMINI_MODEL,
@@ -17,7 +17,7 @@ from agentic_ai.rag.vector_store import (
 )
 
 
-def build_context(
+def build_context(           #llm context   source info for gemini
     retrieved_chunks: list[dict]
 ) -> str:
 
@@ -68,7 +68,7 @@ def build_sources(
             source_key
         )
 
-        sources.append(
+        sources.append(         #adding sturctured source
             {
                 "source": chunk["source"],
                 "page": chunk["page"],
@@ -141,7 +141,7 @@ answer the user's question.
         retrieved_chunks
     )
 
-    if response and hasattr(response, "text") and response.text:
+    if response and hasattr(response, "text") and response.text:    #check gemini response 
         answer_text = response.text
     else:
         # Grounded fallback: return top retrieved text chunk directly
@@ -157,4 +157,12 @@ answer the user's question.
         "sources": sources,
         "retrieved_chunks":
             retrieved_chunks,
-    }
+    }
+
+# user --> accident ? ---> vector store.py --->
+#  chromdb (check similar value in ur vectore db where source data chunk  )---> 
+# similar chunk --> ans ---?  gemini summarise 
+# RAG -- source data --> documentloader.py read --> chunker --> chunks  (source page chunk no )
+#embedding (text to vector) --> embeding service.py --> gemini model use 789vector  
+#vectordb -->chromDB  check which vector close to ur question to ur source  
+#vectorstore.py -->s 70% meaning 30 % exact word mhnjy accurate 
