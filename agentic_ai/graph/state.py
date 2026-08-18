@@ -1,5 +1,6 @@
 from typing import TypedDict, Optional, List, Dict, Any
-
+#what info to travel  through  nodes
+#accurately document state schema  
 class AgentState(TypedDict, total=False):
     question: str
     route: str

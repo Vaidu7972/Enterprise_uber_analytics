@@ -1,9 +1,10 @@
 from google.genai import types
 from agentic_ai.config.agent_config import GEMINI_MODEL
 from agentic_ai.llm.gemini_client import safe_generate_content
-from agentic_ai.nlp.intent_schema import QuestionIntent
-from agentic_ai.prompts.intent_prompt import INTENT_CLASSIFIER_PROMPT
+from agentic_ai.nlp.intent_schema import QuestionIntent                   
+from agentic_ai.prompts.intent_prompt import INTENT_CLASSIFIER_PROMPT     #instrruction
 
+#rule based  classification  multi > ML > support >data > general 
 
 def classify_question(question: str) -> QuestionIntent:
     """

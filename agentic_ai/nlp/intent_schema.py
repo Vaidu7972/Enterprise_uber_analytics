@@ -2,7 +2,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-
+#what info valid routing decsion should contain
 class QuestionIntent(BaseModel):
 
     route: Literal[

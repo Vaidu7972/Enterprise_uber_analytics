@@ -1,8 +1,8 @@
 import time
-from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import StateGraph, END      #stateGraph - workflow blue print  
+from langgraph.checkpoint.memory import MemorySaver   #state rember conversational memory
 from agentic_ai.graph.state import AgentState
-from agentic_ai.graph.nodes import (
+from agentic_ai.graph.nodes import (       #agents
     supervisor_node,
     general_agent_node,
     data_agent_node,
@@ -13,7 +13,7 @@ from agentic_ai.graph.nodes import (
 )
 
 
-def route_decision(state: AgentState) -> str:
+def route_decision(state: AgentState) -> str:   #read route selected by supervisor 
     return state.get("route", "general")
 
 
@@ -42,7 +42,7 @@ builder.add_conditional_edges(
     }
 )
 
-builder.add_edge("general", END)
+builder.add_edge("general", END)                          #transition
 builder.add_edge("data_agent", "evidence_judge")
 builder.add_edge("support_agent", "evidence_judge")
 builder.add_edge("ml_agent", "evidence_judge")
@@ -54,7 +54,7 @@ memory_checkpointer = MemorySaver()
 langgraph_app = builder.compile(checkpointer=memory_checkpointer)
 
 
-def run_orchestration(question: str, session_id: str = "default_session") -> dict:
+def run_orchestration(question: str, session_id: str = "default_session") -> dict:   #to start  
     """
     Run full LangGraph multi-agent workflow with trace steps, evidence reflection, & checkpointing.
     """
@@ -64,8 +64,8 @@ def run_orchestration(question: str, session_id: str = "default_session") -> dic
         "errors": []
     }
 
-    config = {"configurable": {"thread_id": session_id}}
-    final_state = langgraph_app.invoke(initial_state, config=config)
+    config = {"configurable": {"thread_id": session_id}}       #thread id process
+    final_state = langgraph_app.invoke(initial_state, config=config)        
     elapsed_ms = round((time.time() - start_time) * 1000, 2)
 
     route = final_state.get("route", "general")
@@ -115,3 +115,10 @@ def run_orchestration(question: str, session_id: str = "default_session") -> dic
     }
 
     return result
+
+#thread id process 
+
+
+## state.py what info travel
+## node.py what work happen
+## workflow.py how work flows transition 

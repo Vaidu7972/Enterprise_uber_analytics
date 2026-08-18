@@ -23,7 +23,7 @@ def supervisor_node(state: AgentState) -> AgentState:
 
 def general_agent_node(state: AgentState) -> AgentState:
     answer = ask_gemini(state["question"])
-    log_agent_activity(state["question"], "general", "General AI")
+    log_agent_activity(state["question"], "general", "General AI")  #records  agent activty
     return {
         **state,
         "final_answer": answer
@@ -81,7 +81,7 @@ def multi_agent_node(state: AgentState) -> AgentState:
     target_entity = recs.get("target_entity", "N/A")
 
     if approval_required:
-        create_pending_action(
+        create_pending_action(      #action sensitive and requires human approval
             action_type=action_type,
             target_entity=target_entity or "D101",
             details=recs.get("primary_recommendation", "Sensitive action recommendation")

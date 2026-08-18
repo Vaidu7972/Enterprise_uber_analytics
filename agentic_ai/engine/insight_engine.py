@@ -1,21 +1,24 @@
 import pandas as pd
 
-def generate_business_insights(data_result: dict = None, ml_result: dict = None, support_result: dict = None) -> dict:
+def generate_business_insights(data_result: dict = None, ml_result: dict = None, support_result: dict = None): #none - default -> dict
     """
     Insight Engine: Compute deterministic metric summaries and analytical insights
     across Data, ML, and Support Policy evidence.
     """
-    insights = []
+    insights = []     #empty containers
     kpis = {}
 
     # Data Agent Insight Extraction
+    #1. data agent result exist , 2. dataframe --> pandas , 3. Dataframe non empty 
     if data_result and isinstance(data_result.get("data"), pd.DataFrame) and not data_result["data"].empty:
-        df = data_result["data"]
-        kpis["record_count"] = len(df)
-        
-        num_cols = df.select_dtypes(include="number").columns.tolist()
+        df = data_result["data"]                #store
+        kpis["record_count"] = len(df)          #count record
+
+        #detect numerical column(id , rating , total trips)
+
+        num_cols = df.select_dtypes(include="number").columns.tolist()   #pandas column to python list     
         if num_cols:
-            for col in num_cols[:3]:
+            for col in num_cols[:3]:      #atmost 3 
                 kpis[f"total_{col}"] = float(df[col].sum())
                 kpis[f"avg_{col}"] = round(float(df[col].mean()), 2)
 

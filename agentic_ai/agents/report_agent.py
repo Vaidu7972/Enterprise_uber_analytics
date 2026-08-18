@@ -1,10 +1,10 @@
 import os
-import json
-from pathlib import Path
-import pandas as pd
-from sqlalchemy import text
-from agentic_ai.reports.report_generator import generate_pdf_report
-from utils.db_connection import get_engine
+import json   #processing
+from pathlib import Path  #file and folder 
+import pandas as pd       #data processing 
+from sqlalchemy import text   #connect python with sql
+from agentic_ai.reports.report_generator import generate_pdf_report    
+from utils.db_connection import get_engine     #db connectivity
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 REPORTS_DIR = BASE_DIR / "reports"
