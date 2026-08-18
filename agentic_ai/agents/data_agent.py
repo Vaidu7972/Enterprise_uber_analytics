@@ -1,10 +1,10 @@
-import json
-from google.genai import types
+import json               
+from google.genai import types            #google gemini python sdk(how gemini responds)
 
-from agentic_ai.config.agent_config import GEMINI_MODEL
-from agentic_ai.llm.gemini_client import safe_generate_content
+from agentic_ai.config.agent_config import GEMINI_MODEL   #no need to write again again model = gemini 
+from agentic_ai.llm.gemini_client import safe_generate_content     #safe_generate_content means only read - select and with query
 from agentic_ai.prompts.data_agent_prompt import (
-    DATA_AGENT_SQL_PROMPT,
+    DATA_AGENT_SQL_PROMPT,   #instruction to gemini when sql generated
     DATA_RESULT_PROMPT,
 )
 from agentic_ai.schemas.sql_plan import SQLPlan
@@ -14,7 +14,7 @@ from agentic_ai.tools.sql_tool import (
 )
 
 
-import re
+import re   #regular expression - to detect patterns
 from agentic_ai.memory.conversation_memory import resolve_entity_in_question, update_session_memory
 
 
@@ -138,7 +138,7 @@ INSTRUCTION: Correct the SQL query using ONLY the columns and tables defined in 
         except Exception:
             pass
 
-    return SQLPlan(
+    return SQLPlan(           #fallback if query fails or incorrect structure o/p
         can_answer=True,
         sql="SELECT * FROM gold.kpi_summary;",
         tables_used=["gold.kpi_summary"],
@@ -154,7 +154,7 @@ def explain_query_result(
 
     # Instant Deterministic Result Summary Formatting
     if len(dataframe) == 1:
-        row = dataframe.iloc[0].to_dict()
+        row = dataframe.iloc[0].to_dict()   #to get first row of df
         formatted_items = []
         for k, v in row.items():
             if isinstance(v, float):
@@ -185,7 +185,7 @@ def answer_data_question(
     for attempt in range(max_retries + 1):
         plan = generate_sql_plan(
             question,
-            error_context=error_context,
+            error_context=error_context,    #error aware & retry / self correction
             previous_sql=previous_sql
         )
 
@@ -217,17 +217,17 @@ def answer_data_question(
                 }
 
             answer = explain_query_result(question, plan.sql, dataframe)
-            records = dataframe.to_dict(orient="records")
+            records = dataframe.to_dict(orient="records")     #df to records convert 
 
-            return {
+            return {                       #final successful ans return 
                 "answer": answer,
                 "sql": plan.sql,
                 "data": records,
                 "tables_used": plan.tables_used,
             }
 
-        except Exception as err:
-            error_context = str(err)
+        except Exception as err:           #error handling logic
+            error_context = str(err)       #skips all fixed rules  actual schema display  
             previous_sql = plan.sql
             if attempt == max_retries:
                 return {
